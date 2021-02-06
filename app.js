@@ -15,6 +15,7 @@ serv.listen(PORT,function(){
 });
 //--------------End of express setup code----------------//
 
+//How to update game on heroku app:
 //git add .
 //git commit -m "commit notes"
 //git push heroku master
@@ -94,18 +95,6 @@ var Player = function(id){
       self.x = self.x - self.maxSpd * Math.sin(self.thetaY);
       //console.log(self.z);
     }
-    // if(self.arrowUp) {
-    //   self.thetaX = self.thetaX - self.viewSpd;
-    // }
-    // if(self.arrowDown) {
-    //   self.thetaX = self.thetaX + self.viewSpd;
-    // }
-    // if(self.arrowLeft) {
-    //   self.thetaY = self.thetaY - self.viewSpd;
-    // }
-    // if(self.arrowRight) {
-    //   self.thetaY = self.thetaY + self.viewSpd;
-    // }
   }
 
   // self.checkCollisionPlayerAllBlocks = function(){

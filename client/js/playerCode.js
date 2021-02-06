@@ -225,14 +225,21 @@ var oldX = 0;
 var oldY = 0;
 
 socket.on('gameLoop', function(data){
+
+  //updating position of other players in game
   for(var i = 0; i < data.length; i++){
     if (data[i].isPlayer){
       //console.log("setting player " + i + " position to " + data[i].x + "," + data[i].z);
-      OTHER_PLAYER_LIST[data[i].id].position.x = data[i].x;
-      OTHER_PLAYER_LIST[data[i].id].position.y = data[i].y;
-      OTHER_PLAYER_LIST[data[i].id].position.z = data[i].z;
-      //player_counter += 1;
-      //console.log("counter = " + counter);
+      if(OTHER_PLAYER_LIST[data[i].id].position.x != data[i].x){
+        console.log("Player " + data[i].id + " Moved in x direction");
+        OTHER_PLAYER_LIST[data[i].id].position.x = data[i].x;
+      }
+      if(OTHER_PLAYER_LIST[data[i].id].position.y != data[i].y){
+        OTHER_PLAYER_LIST[data[i].id].position.y = data[i].y;
+      }
+      if (OTHER_PLAYER_LIST[data[i].id].position.z != data[i].z){
+        OTHER_PLAYER_LIST[data[i].id].position.z = data[i].z;
+      }
     }
   }
 
