@@ -22,18 +22,16 @@ serv.listen(PORT,function(){
 
 //var THREE = require('./client/js/three.js');
 
-
-
-var SOCKET_LIST = {};
-var PLAYER_LIST = {};
+/*
+These lists used to store players and sockets
+*/
+var SOCKET_LIST = {};//this list used to access socket connections
+var PLAYER_LIST = {};//this list used to store each player object
 //var BLOCK_LIST = {};
-//var POINT_LIST = {};//3d
 
+//this info sent to player on connection
 var playerSpeed = 0.05;
 var playerHeight = 1;
-
-//var playerHeight = 100;
-var playerWidth = 50;
 
 // var blockWidth = 100;
 // var blockHeight = 100;
@@ -42,110 +40,53 @@ var playerWidth = 50;
 
 //var direction = new THREE.Vector3();//used to save player x,z
 
+/*
+This is the Player Object
+It stores all information about current player
+id is used to identify player in lists
+*/
 var Player = function(id){
   var self = {
     x:0,
     y:0,
     z:0,
-    thetaX:0,
-    thetaY:0,
-    thetaZ:0,
     id:id,
-    width:playerWidth,
-    height:playerHeight,
     name:"Will",
-    number:""+Math.floor(10*Math.random()),
     cameraX:0,
     cameraY:0,
     pressingRight:false,
     pressingLeft:false,
     pressingUp:false,
-    pressingDown:false,
-    arrowUp:false,
-    arrowDown:false,
-    arrowRight:false,
-    arrowLeft:false,
-    maxSpd:0.3,
-    viewSpd:0.05,
-    verticalSpeed:0,
-    maxVerticalSpeed:10
+    pressingDown:false
   }
-  self.updatePosition = function(){
-    if (self.pressingRight){
-      //self.x = self.x + self.maxSpd * Math.sin(self.thetaY + 1.5708); //adding 90 degrees in radians
-      //self.z = self.z + self.maxSpd * Math.cos(self.thetaY + 1.5708);
-    }
-    if (self.pressingLeft){
-      //self.x = self.x - self.maxSpd * Math.sin(self.thetaY + 1.5708);
-      //self.z = self.z - self.maxSpd * Math.cos(self.thetaY + 1.5708);
-    }
-    if(self.verticalUp) {
-      //self.y = self.y + self.maxSpd;
-    }
-    if(self.verticalDown) {
-      //self.y = self.y - self.maxSpd;
-    }
-    if(self.pressingUp) {
-      //self.z = self.z + self.maxSpd * Math.cos(self.thetaY);
-      //self.x = self.x + self.maxSpd * Math.sin(self.thetaY);
-      //console.log(self.z);
-    }
-    if(self.pressingDown) {
-      //self.z = self.z - self.maxSpd * Math.cos(self.thetaY);
-      //self.x = self.x - self.maxSpd * Math.sin(self.thetaY);
-      //console.log(self.z);
-    }
-  }
-
-  // self.checkCollisionPlayerAllBlocks = function(){
-  //   for (var i in BLOCK_LIST){
-  //     var block = BLOCK_LIST[i];
-  //     if (self.checkCollisionPlayerBlock(block)){
-  //       return true;
-  //     }
-  //   }
-  //   return false;
-  // }//calls check single block fncn with all blocks
-  // self.checkCollisionPlayerBlock = function(block){
-  //   var selfXTL = self.x - (self.width/2);
-  //   var selfYTL = self.y - (self.height/2);
-  //   var bXTL = block.x - (block.width/2);
-  //   var bYTL = block.y - (block.height/2);
-  //
-  //   if (selfXTL < bXTL + block.width &&
-  //     selfXTL + self.width > bXTL &&
-  //     selfYTL < bYTL + block.height &&
-  //     selfYTL + self.height > bYTL) {
-  //       return true;
-  //   }
-  //   return false;
-  // }//checks player against single block
-  self.jump = function(){
-    self.verticalSpeed = -25;
-  }//function to make player jump
-
   return self;
 }
 
 
-//Socket.io on connection and disconnection
+//Socket.io used for multiplayer functionality
 var io = require('socket.io')(serv,{});
-//main io connection and key detection function
+
+/*
+This function handles all connections and disconnections
+When a player connects all other player information is sent to new player,
+and new player information is sent to all other players.
+When a player disconnects the id is sent to all other players to remove from OTHER_PLAYER_LIST
+
+Anthing within this function is either called on connection or disconnection
+*/
 io.sockets.on('connection', function(socket){//called when player connects with server
-  socket.id = Math.random();
+  socket.id = Math.random();//getting random number between 0-1 for player id
   SOCKET_LIST[socket.id] = socket;//adding player socket to list
-  //console.log('socket connection');
 
-  var player = Player(socket.id);
-  console.log("New Player with ID: " + socket.id);
-  PLAYER_LIST[socket.id] = player;
+  var player = Player(socket.id);//creating player with socket id
+  console.log("New Player with ID: " + socket.id);//printing connection with id to console
+  PLAYER_LIST[socket.id] = player;//adding new player to PLAYER_LIST
 
-
-  SOCKET_LIST[socket.id].emit('setID', {id:socket.id, spd:playerSpeed, hgt:playerHeight});//emmitting id of player, used for centering camera
+  SOCKET_LIST[socket.id].emit('setID', {id:socket.id, spd:playerSpeed, hgt:playerHeight});//Sending player's id to itself, stored in selfID in playerCode.js
 
   //this sends all other player information to new player just connected
   var playerPack = [];
-  for (var i in PLAYER_LIST){
+  for (var i in PLAYER_LIST){//loop through each player
       var player = PLAYER_LIST[i];
       playerPack.push({
         name:player.name,
@@ -153,32 +94,36 @@ io.sockets.on('connection', function(socket){//called when player connects with 
         y:player.y,
         z:player.z,
         id:player.id
-      });
+      });//adding each player position and view direction to pack
   }
   SOCKET_LIST[socket.id].emit('initPlayers', playerPack);//sending other player information to new player
 
   //now we send new player information to all other new players
   for(var i in SOCKET_LIST) {
     if(i != socket.id){//this makes sure it doesnt send single new player info to the newly connected player (they get all info from initPlayers)
-      //console.log("sent new player with id: " + player.id + "information to player " + i);
       SOCKET_LIST[i].emit('newPlayer',{id:socket.id,x:player.x,y:player.y,z:player.z,name:player.name});//player is new player, sending information to all others
     }
   }
 
+  /*
+  This function alerts all players when someone disconnects so they
+  can be removed from scene
+  */
   socket.on('disconnect',function(){//called when player disconnects from server
-    console.log("Player Disconnected with ID: " + socket.id);
+    console.log("Player Disconnected with ID: " + socket.id);//printing player disconnect info to console
     for(var i in SOCKET_LIST) {
       if(i != socket.id){//this sends player disconnection info to all players
         SOCKET_LIST[i].emit('disconnectedPlayer',{id:socket.id});//sending disconnect information to all others
       }
     }
     delete SOCKET_LIST[socket.id];//deleting player's socket from list
-    delete PLAYER_LIST[socket.id];
+    delete PLAYER_LIST[socket.id];//delete player from list
   });
 
 
-
-  //This function recieves player position and direction information from each player every cycle of gameloop
+  /*
+  This function recieves player position and direction information from each player every cycle of gameloop
+  */
   socket.on('selfMoveInfo',function(data){
     //console.log("Server recived X: " + data[0].playerX + " for player " + player.id);
     player.cameraX = data[0].cameraX;
@@ -188,6 +133,9 @@ io.sockets.on('connection', function(socket){//called when player connects with 
     player.z = data[0].playerZ;
   });
 
+  /*
+    This function recieves keypress information from the user
+  */
   socket.on('keyPress',function(data){//called when player presses a key
     if(data.inputId === 'left'){
       player.pressingLeft = data.state;
@@ -201,38 +149,27 @@ io.sockets.on('connection', function(socket){//called when player connects with 
       player.verticalUp = data.state;
     } else if (data.inputId === 'shift'){
       player.verticalDown = data.state;
-    } else if (data.inputId === 'arrowUp') {
-      player.arrowUp = data.state;
-    } else if (data.inputId === 'arrowDown') {
-      player.arrowDown = data.state;
-    } else if (data.inputId === 'arrowLeft') {
-      player.arrowLeft = data.state;
-    } else if (data.inputId === 'arrowRight') {
-      player.arrowRight = data.state;
     }
   });
 });
 
 
+/*
+  This is the gameloop function
+  It runs on the interval 1000/100 at the end of the function
+  This sends all player information to each player
+*/
 setInterval(function(){//game loop
   var pack = [];//pack to transfer data
   for (var i in PLAYER_LIST){
       var player = PLAYER_LIST[i];
-      player.updatePosition();
-      //console.log("server sent " + player.x);
-      //console.log("Player " + i + " position: " + player.x + "," + player.z);
       pack.push({
         x:player.x,
         y:player.y,
         z:player.z,
-        maxSpd:player.maxSpd,
-        thetaX:player.thetaX,//camera angle in radians
-        thetaY:player.thetaY,
-        thetaZ:player.thetaZ,
         id:player.id,
         height:player.height,
         width:player.width,
-        number:player.number,
         isPlayer:true,
         isBlock:false,
         isPoint:false
