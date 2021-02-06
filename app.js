@@ -72,27 +72,27 @@ var Player = function(id){
   }
   self.updatePosition = function(){
     if (self.pressingRight){
-      self.x = self.x + self.maxSpd * Math.sin(self.thetaY + 1.5708); //adding 90 degrees in radians
-      self.z = self.z + self.maxSpd * Math.cos(self.thetaY + 1.5708);
+      //self.x = self.x + self.maxSpd * Math.sin(self.thetaY + 1.5708); //adding 90 degrees in radians
+      //self.z = self.z + self.maxSpd * Math.cos(self.thetaY + 1.5708);
     }
     if (self.pressingLeft){
-      self.x = self.x - self.maxSpd * Math.sin(self.thetaY + 1.5708);
-      self.z = self.z - self.maxSpd * Math.cos(self.thetaY + 1.5708);
+      //self.x = self.x - self.maxSpd * Math.sin(self.thetaY + 1.5708);
+      //self.z = self.z - self.maxSpd * Math.cos(self.thetaY + 1.5708);
     }
     if(self.verticalUp) {
-      self.y = self.y + self.maxSpd;
+      //self.y = self.y + self.maxSpd;
     }
     if(self.verticalDown) {
-      self.y = self.y - self.maxSpd;
+      //self.y = self.y - self.maxSpd;
     }
     if(self.pressingUp) {
-      self.z = self.z + self.maxSpd * Math.cos(self.thetaY);
-      self.x = self.x + self.maxSpd * Math.sin(self.thetaY);
+      //self.z = self.z + self.maxSpd * Math.cos(self.thetaY);
+      //self.x = self.x + self.maxSpd * Math.sin(self.thetaY);
       //console.log(self.z);
     }
     if(self.pressingDown) {
-      self.z = self.z - self.maxSpd * Math.cos(self.thetaY);
-      self.x = self.x - self.maxSpd * Math.sin(self.thetaY);
+      //self.z = self.z - self.maxSpd * Math.cos(self.thetaY);
+      //self.x = self.x - self.maxSpd * Math.sin(self.thetaY);
       //console.log(self.z);
     }
   }
@@ -180,7 +180,7 @@ io.sockets.on('connection', function(socket){//called when player connects with 
 
   //This function recieves player position and direction information from each player every cycle of gameloop
   socket.on('selfMoveInfo',function(data){
-    console.log("Server recived X: " + data[0].playerX + " for player " + player.id);
+    //console.log("Server recived X: " + data[0].playerX + " for player " + player.id);
     player.cameraX = data[0].cameraX;
     player.cameraY = data[0].cameraY;
     player.x = data[0].playerX;
@@ -219,6 +219,7 @@ setInterval(function(){//game loop
   for (var i in PLAYER_LIST){
       var player = PLAYER_LIST[i];
       player.updatePosition();
+      //console.log("server sent " + player.x);
       //console.log("Player " + i + " position: " + player.x + "," + player.z);
       pack.push({
         x:player.x,

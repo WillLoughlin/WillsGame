@@ -230,8 +230,9 @@ socket.on('gameLoop', function(data){
   for(var i = 0; i < data.length; i++){
     if (data[i].isPlayer){
       //console.log("setting player " + i + " position to " + data[i].x + "," + data[i].z);
+      //console.log("recieved " + data[i].x + " for player " + data[i].id);
       if(OTHER_PLAYER_LIST[data[i].id].position.x != data[i].x){
-        console.log("Player " + data[i].id + " Moved from " + OTHER_PLAYER_LIST[data[i].id].position.x + " to " + data[i].x);
+        //console.log("Player " + data[i].id + " Moved from " + OTHER_PLAYER_LIST[data[i].id].position.x + " to " + data[i].x);
         OTHER_PLAYER_LIST[data[i].id].position.x = data[i].x;
       }
       if(OTHER_PLAYER_LIST[data[i].id].position.y != data[i].y){
