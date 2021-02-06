@@ -1,4 +1,5 @@
 //---------This code here used to set up Express (send index.html file to client)----------//
+var PORT = process.env.PORT || 2000;
 var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
@@ -9,8 +10,9 @@ app.get('/', function(req, res) {
 
 app.use('/client', express.static(__dirname + '/client'));
 
-serv.listen(2000);
-console.log("Server Started");
+serv.listen(PORT,function(){
+  console.log('Server Started')
+});
 //--------------End of express setup code----------------//
 
 //import * as THREE from './client/js/three.js';
