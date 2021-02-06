@@ -180,6 +180,7 @@ io.sockets.on('connection', function(socket){//called when player connects with 
 
   //This function recieves player position and direction information from each player every cycle of gameloop
   socket.on('selfMoveInfo',function(data){
+    console.log("Server recived X: " + data[0].playerX + " for player " + player.id);
     player.cameraX = data[0].cameraX;
     player.cameraY = data[0].cameraY;
     player.x = data[0].playerX;
