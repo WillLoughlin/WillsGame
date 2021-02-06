@@ -11,6 +11,14 @@
   "scripts": {
     "start": "node app.js"
   },
+  "repository"{
+    "type":"git",
+    "url":""
+  },
   "author": "Will Loughlin",
   "license": "ISC"
+  "bugs":{
+    "url":""
+  },
+  "homepage":""
 }
