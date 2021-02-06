@@ -5,7 +5,10 @@
   "main": "app.js",
   "dependencies": {
     "express": "^4.17.1",
-    "socket.io": "^1.7.4"
+    "socket.io": "^2.3.0"
+  },
+  "engines": {
+    "node":"12.10.x"
   },
   "devDependencies": {},
   "scripts": {
@@ -19,6 +22,5 @@
   "license": "ISC",
   "bugs": {
     "url":""
-  },
-  "homepage":""
+  }
 }
