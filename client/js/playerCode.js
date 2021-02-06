@@ -231,7 +231,7 @@ socket.on('gameLoop', function(data){
     if (data[i].isPlayer){
       //console.log("setting player " + i + " position to " + data[i].x + "," + data[i].z);
       if(OTHER_PLAYER_LIST[data[i].id].position.x != data[i].x){
-        //console.log("Player " + data[i].id + " Moved from " + OTHER_PLAYER_LIST[data[i].id].position.x + " to " + data[i].x);
+        console.log("Player " + data[i].id + " Moved from " + OTHER_PLAYER_LIST[data[i].id].position.x + " to " + data[i].x);
         OTHER_PLAYER_LIST[data[i].id].position.x = data[i].x;
       }
       if(OTHER_PLAYER_LIST[data[i].id].position.y != data[i].y){
