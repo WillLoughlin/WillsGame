@@ -61,7 +61,7 @@ socket.on('setID', function(playerID){
 //adding stuff to scene
 var cubeMaterials =
 [
-  new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('client/img/1.JPG'),side: THREE.DoubleSide}),//right side
+  new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('client/img/1.jpg'),side: THREE.DoubleSide}),//right side
   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('client/img/2.jpg'),side: THREE.DoubleSide}),//left side
   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('client/img/3.jpg'),side: THREE.DoubleSide}),//top side
   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('client/img/4.jpg'),side: THREE.DoubleSide}),//bottom side

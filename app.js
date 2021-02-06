@@ -15,12 +15,12 @@ serv.listen(PORT,function(){
 });
 //--------------End of express setup code----------------//
 
-//import * as THREE from './client/js/three.js';
+//git add .
+//git commit -m "commit notes"
+//git push heroku master
 
 //var THREE = require('./client/js/three.js');
-//var PointerLockControls = require('./client/js/PointerLockControls.js');
 
-//import { PointerLockControls } from './client/js/PointerLockControls.js';
 
 
 var SOCKET_LIST = {};
