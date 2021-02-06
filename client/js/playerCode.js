@@ -231,7 +231,7 @@ socket.on('gameLoop', function(data){
     if (data[i].isPlayer){
       //console.log("setting player " + i + " position to " + data[i].x + "," + data[i].z);
       if(OTHER_PLAYER_LIST[data[i].id].position.x != data[i].x){
-        console.log("Player " + data[i].id + " Moved from " + OTHER_PLAYER_LIST[data[i].id].position.x + " to " + data[i].x);
+        //console.log("Player " + data[i].id + " Moved from " + OTHER_PLAYER_LIST[data[i].id].position.x + " to " + data[i].x);
         OTHER_PLAYER_LIST[data[i].id].position.x = data[i].x;
       }
       if(OTHER_PLAYER_LIST[data[i].id].position.y != data[i].y){
@@ -262,12 +262,25 @@ socket.on('gameLoop', function(data){
 var sendPlayerInfo = function(){
   var data = [];
   camera.getWorldDirection(target);//direction is copied into vector "target"
+  var decimal_places = 6;
+  var posX = camera.position.x;
+  var stringPositionX = posX.toFixed(decimal_places);
+  posX = parseFloat(stringPositionX);
+
+  var posY = camera.position.y;
+  var stringPositionY = posY.toFixed(decimal_places);
+  posY = parseFloat(stringPositionY);
+
+  var posZ = camera.position.z;
+  var stringPositionZ = posZ.toFixed(decimal_places);
+  posZ = parseFloat(stringPositionZ);
+  //console.log("send player X: " + posX);
   data.push({
     cameraX:target.x,
     cameraY:target.y,
-    playerX:camera.position.x,
-    playerY:camera.position.y,
-    playerZ:camera.position.z
+    playerX:posX,
+    playerY:posY,
+    playerZ:posZ
   });
   socket.emit('selfMoveInfo',data);
 };
