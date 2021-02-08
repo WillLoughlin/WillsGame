@@ -81,7 +81,7 @@ camera.position.y = height;
 
 
 const geometryCylinder = new THREE.CylinderGeometry( 0.25, 0.25, height, 32 );
-const materialCylinder = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+const materialCylinder = new THREE.MeshBasicMaterial( {color: 0x336BFF, wireframe:true} );
 //cylinder = new THREE.Mesh( geometry, material );
 
 
