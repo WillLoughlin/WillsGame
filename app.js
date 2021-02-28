@@ -41,10 +41,6 @@ var playerHeight = 1;
 //var direction = new THREE.Vector3();//used to save player x,z
 
 /*
-This is the Player Object
-It stores all information about current player
-id is used to identify player in lists
-*/
 var Player = function(id){
   var self = {
     x:0,
@@ -61,7 +57,67 @@ var Player = function(id){
   }
   return self;
 }
+*///old player object
 
+/*
+This is the Thing Object
+All other objects in the game inherit position, id, and type variables from the thing object
+*/
+function Thing(id, x, y, z, type){
+  this.id = id;
+  this.x = x;
+  this.y = y;
+  this.z = z;
+  this.type = type;//string used to determine what thing is
+}
+
+/*
+This is the Player Object
+It stores all information about current player
+id is used to identify player in lists
+*/
+function Player(id, x, y, z, type, name){
+  Thing.call(this, id, x, y, z, type);//inheriting id,x,y,z,type from Thing object
+  this.name = name;
+  this.cameraX = 0;
+  this.cameraY = 0;
+  this.pressingRight = false;
+  this.pressingLeft = false;
+  this.pressingUp = false;
+  this.pressingDown = false;
+}//to add member functions go to https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Inheritance
+//wierd stuff with prototype keyword
+
+//This section of code allows the inherited Player object to use the prototype functions from the Thing object
+Player.prototype = Object.create(Thing.prototype);
+Object.defineProperty(Player.prototype, 'constructor', {
+  value: Player,
+  enumerable: false,
+  writable: true
+});
+
+
+/*
+This is the Block object
+It is used to create the blocks that make up the map
+It inherits x,y,x,id,type from Thing object
+*/
+function Block(id, x, y, z, type, width, height, imgSides, imgTop, imgBottom){
+  Thing.call(this, id, x, y, z, type);//inheriting from thing
+  this.width = width;
+  this.height = height;
+  this.imgSides = imgSides;
+  this.imgTop = imgTop;
+  this.imgBottom = imgBottom;
+}
+
+//This code allows Block to use member functions of Thing object
+Block.prototype = Object.create(Thing.prototype);
+Object.defineProperty(Block.prototype, 'constructor', {
+  value: Player,
+  enumerable: false,
+  writable: true
+});
 
 //Socket.io used for multiplayer functionality
 var io = require('socket.io')(serv,{});
@@ -78,7 +134,7 @@ io.sockets.on('connection', function(socket){//called when player connects with 
   socket.id = Math.random();//getting random number between 0-1 for player id
   SOCKET_LIST[socket.id] = socket;//adding player socket to list
 
-  var player = Player(socket.id);//creating player with socket id
+  var player = new Player(socket.id, 0, 0, 0, "Player", "Will");//creating player with socket id
   console.log("New Player with ID: " + socket.id);//printing connection with id to console
   PLAYER_LIST[socket.id] = player;//adding new player to PLAYER_LIST
 
