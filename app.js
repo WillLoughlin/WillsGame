@@ -31,7 +31,7 @@ var BLOCK_LIST = {};
 
 //this info sent to player on connection
 var playerSpeed = 0.05;
-var playerHeight = 1;
+var playerHeight = 2;
 
 // var blockWidth = 100;
 // var blockHeight = 100;
@@ -130,7 +130,7 @@ Object.defineProperty(Block.prototype, 'constructor', {
 var counter = 1;
 for (var i = -2; i < 3; i++){
   for(var j = -2; j < 3; j++){
-    var block = new Block(counter,i,0,j,"Block", 1, 1, "client/img/1.jpg", "client/img/lowRes_hardwood.jpg", "client/img/1.jpg");
+    var block = new Block(counter,i,0,j,"Block", 1, 1, "client/img/1.jpg", "client/img/hardwood_floor.jpg", "client/img/1.jpg");
     BLOCK_LIST[counter] = block;
     counter++;
   }

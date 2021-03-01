@@ -17,8 +17,8 @@ var FOV_degrees = 60;
 var OTHER_PLAYER_LIST = {};
 var BLOCK_LIST = {};
 
-var speed = 0.05;
-var height = 1;
+var playerSpeed = 0.05;
+var playerHeight = 1;
 
 //These variables used for movement
 let moveForward = false;
@@ -54,8 +54,8 @@ var indexSelf = 0;
 socket.on('setID', function(playerID){
   selfID = playerID.id;
   console.log("New ID Set to: " + selfID);
-  speed = playerID.spd;
-  height = playerID.hgt;
+  playerSpeed = playerID.spd;
+  playerHeight = playerID.hgt;
 });
 
 
@@ -77,11 +77,11 @@ var cube = new THREE.Mesh(geometry,material);//creating cube
 //scene.add(cube);//adding cube to 3d scene
 
 camera.position.z = 3;//initialize camera position
-camera.position.y = height;
+camera.position.y = playerHeight + (playerHeight * 0.5);
 
 
 
-const geometryCylinder = new THREE.CylinderGeometry( 0.25, 0.25, height, 32 );
+const geometryCylinder = new THREE.CylinderGeometry( 0.5, 0.5, 2, 32 );
 const materialCylinder = new THREE.MeshBasicMaterial( {color: 0x336BFF, wireframe:true} );
 //cylinder = new THREE.Mesh( geometry, material );
 
@@ -272,8 +272,8 @@ socket.on('gameLoop', function(data){
 	direction.x = Number( moveRight ) - Number( moveLeft );//1 if move right, -1 if move left
   direction.normalize(); // this ensures consistent movements in all directions
 
-  controls.moveRight(speed * direction.x);
-  controls.moveForward(speed * direction.z);
+  controls.moveRight(playerSpeed * direction.x);
+  controls.moveForward(playerSpeed * direction.z);
 
   sendPlayerInfo();
   update();
