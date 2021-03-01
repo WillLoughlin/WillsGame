@@ -87,6 +87,9 @@ const materialCylinder = new THREE.MeshBasicMaterial( {color: 0x336BFF, wirefram
 
 
 //----------------Drawing other players in game-----------------------//
+//https://www.youtube.com/watch?v=EkPfhzIbp2g&ab_channel=SimonDev
+//mixamo.com
+//video for player models
 socket.on('initPlayers', function(players){
   //console.log("creating players");
   for(var i = 0; i < players.length; i++){
