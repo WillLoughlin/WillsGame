@@ -27,7 +27,7 @@ These lists used to store players and sockets
 */
 var SOCKET_LIST = {};//this list used to access socket connections
 var PLAYER_LIST = {};//this list used to store each player object
-//var BLOCK_LIST = {};
+var BLOCK_LIST = {};
 
 //this info sent to player on connection
 var playerSpeed = 0.05;
@@ -119,6 +119,24 @@ Object.defineProperty(Block.prototype, 'constructor', {
   writable: true
 });
 
+
+//Creating Map
+//var block1 = new Block(1,1,0,1,"Block", 1, 1, "client/img/1.jpg", "client/img/1.jpg", "client/img/1.jpg");
+//BLOCK_LIST[1] = block1;
+
+//var block2 = new Block(2,2,0,2,"Block", 1, 1, "client/img/1.jpg", "client/img/1.jpg", "client/img/1.jpg");
+//BLOCK_LIST[2] = block2;
+
+var counter = 1;
+for (var i = -2; i < 3; i++){
+  for(var j = -2; j < 3; j++){
+    var block = new Block(counter,i,0,j,"Block", 1, 1, "client/img/1.jpg", "client/img/lowRes_hardwood.jpg", "client/img/1.jpg");
+    BLOCK_LIST[counter] = block;
+    counter++;
+  }
+}
+
+
 //Socket.io used for multiplayer functionality
 var io = require('socket.io')(serv,{});
 
@@ -153,6 +171,24 @@ io.sockets.on('connection', function(socket){//called when player connects with 
       });//adding each player position and view direction to pack
   }
   SOCKET_LIST[socket.id].emit('initPlayers', playerPack);//sending other player information to new player
+
+  var blockPack = [];
+  for (var i in BLOCK_LIST){
+    var block = BLOCK_LIST[i];
+    blockPack.push({
+      id:block.id,
+      x:block.x,
+      y:block.y,
+      z:block.z,
+      height:block.height,
+      width:block.width,
+      imgSides:block.imgSides,
+      imgTop:block.imgTop,
+      imgBottom:block.imgBottom,
+      type:block.type
+    });
+  }
+  SOCKET_LIST[socket.id].emit('initBlocks',blockPack);//sending block infmormation to new player
 
   //now we send new player information to all other new players
   for(var i in SOCKET_LIST) {
@@ -218,30 +254,33 @@ io.sockets.on('connection', function(socket){//called when player connects with 
 setInterval(function(){//game loop
   var pack = [];//pack to transfer data
   for (var i in PLAYER_LIST){
+    //console.log("added player " + PLAYER_LIST[i].id + " with x: "+ PLAYER_LIST[i].x + " to pack");
       var player = PLAYER_LIST[i];
       pack.push({
         x:player.x,
         y:player.y,
         z:player.z,
         id:player.id,
+        name:player.name,
         height:player.height,
         width:player.width,
-        isPlayer:true,
-        isBlock:false,
-        isPoint:false
+        type:player.type
       });
   }
 
   // for (var i in BLOCK_LIST){
   //   var block = BLOCK_LIST[i];
   //   pack.push({
+  //     id:block.id,
   //     x:block.x,
   //     y:block.y,
+  //     z:block.z,
   //     height:block.height,
   //     width:block.width,
-  //     isPlayer:false,
-  //     isBlock:true,
-  //     isPoint:false
+  //     imgSides:block.imgSides,
+  //     imgTop:block.imgTop,
+  //     imgBottom:block.imgBottom,
+  //     type:block.type
   //   });
   // }
 

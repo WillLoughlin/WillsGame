@@ -15,6 +15,7 @@ var HEIGHT = 500;
 var FOV_degrees = 60;
 
 var OTHER_PLAYER_LIST = {};
+var BLOCK_LIST = {};
 
 var speed = 0.05;
 var height = 1;
@@ -63,7 +64,7 @@ var cubeMaterials =
 [
   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('client/img/1.jpg'),side: THREE.DoubleSide}),//right side
   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('client/img/2.jpg'),side: THREE.DoubleSide}),//left side
-  new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('client/img/3.jpg'),side: THREE.DoubleSide}),//top side
+  new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('client/img/hardwood_floor.jpg'),side: THREE.DoubleSide}),//top side
   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('client/img/4.jpg'),side: THREE.DoubleSide}),//bottom side
   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('client/img/5.jpg'),side: THREE.DoubleSide}),//front side
   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('client/img/6.jpg'),side: THREE.DoubleSide}),//back side
@@ -73,7 +74,7 @@ var cubeMaterials =
 //var material = new THREE.MeshBasicMaterial({color: 0xFFFFFF,wireframe:true});
 var material = new THREE.MeshFaceMaterial(cubeMaterials);//call with image array
 var cube = new THREE.Mesh(geometry,material);//creating cube
-scene.add(cube);//adding cube to 3d scene
+//scene.add(cube);//adding cube to 3d scene
 
 camera.position.z = 3;//initialize camera position
 camera.position.y = height;
@@ -107,6 +108,29 @@ socket.on('initPlayers', function(players){
   }
 });
 //-------------------End drawing other players---------------------//
+
+//------------------Creating Map With Blocks----------------------//
+socket.on('initBlocks', function(blocks){
+  for (var i = 0; i < blocks.length; i++){
+    var blockGeometry = new THREE.BoxGeometry(blocks[i].width,blocks[i].height,blocks[i].height);//width,depth,HEIGHT
+    var blockMaterials =
+    [
+      new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//right side
+      new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//left side
+      new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgTop),side: THREE.DoubleSide}),//top side
+      new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgBottom),side: THREE.DoubleSide}),//bottom side
+      new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//front side
+      new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//back side
+    ];//each image corresponds to different side
+
+    //add materials and then add cube
+    var block = new THREE.Mesh(blockGeometry, blockMaterials);
+    block.position.x = blocks[i].x;
+    block.position.y = blocks[i].y;
+    block.position.z = blocks[i].z;
+    scene.add(block);
+  }
+});
 
 //this function adds a new player to scene when other new player connects
 socket.on('newPlayer',function(newPlayer){
@@ -225,23 +249,22 @@ var oldX = 0;
 var oldY = 0;
 
 socket.on('gameLoop', function(data){
-
+  //console.log("test");
   //updating position of other players in game
   for(var i = 0; i < data.length; i++){
-    if (data[i].isPlayer){
-      //console.log("setting player " + i + " position to " + data[i].x + "," + data[i].z);
-      //console.log("recieved " + data[i].x + " for player " + data[i].id);
-      if(OTHER_PLAYER_LIST[data[i].id].position.x != data[i].x){
-        //console.log("Player " + data[i].id + " Moved from " + OTHER_PLAYER_LIST[data[i].id].position.x + " to " + data[i].x);
-        OTHER_PLAYER_LIST[data[i].id].position.x = data[i].x;
-      }
-      if(OTHER_PLAYER_LIST[data[i].id].position.y != data[i].y){
-        OTHER_PLAYER_LIST[data[i].id].position.y = data[i].y;
-      }
-      if (OTHER_PLAYER_LIST[data[i].id].position.z != data[i].z){
-        OTHER_PLAYER_LIST[data[i].id].position.z = data[i].z;
-      }
+    //console.log("setting player " + i + " position to " + data[i].x + "," + data[i].z);
+    //console.log("recieved " + data[i].x + " for player " + data[i].id);
+    if(OTHER_PLAYER_LIST[data[i].id].position.x != data[i].x){
+      //console.log("Player " + data[i].id + " Moved from " + OTHER_PLAYER_LIST[data[i].id].position.x + " to " + data[i].x);
+      OTHER_PLAYER_LIST[data[i].id].position.x = data[i].x;
     }
+    if(OTHER_PLAYER_LIST[data[i].id].position.y != data[i].y){
+        OTHER_PLAYER_LIST[data[i].id].position.y = data[i].y;
+    }
+    if (OTHER_PLAYER_LIST[data[i].id].position.z != data[i].z){
+      OTHER_PLAYER_LIST[data[i].id].position.z = data[i].z;
+    }
+
   }
 
 
@@ -288,8 +311,8 @@ var sendPlayerInfo = function(){
 
 //game logic
 var update = function(){
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.005;
+  //cube.rotation.x += 0.01;
+  //cube.rotation.y += 0.005;
 };
 
 //draw scene
