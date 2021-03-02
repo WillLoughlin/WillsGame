@@ -7,6 +7,9 @@ Movement is handled here and position is relayed to app.js server file
 Everytime gameloop is called this file recieves position and direction of each other player
 */
 
+//import {GLTFLoader} from './GLTFLoader.js';
+import {FBXLoader} from './FBXLoader.js';//used to load player model
+
 //Width and height of screen, will be changed when screen is sized
 var WIDTH = 500;
 var HEIGHT = 500;
@@ -14,9 +17,11 @@ var HEIGHT = 500;
 //View FOV
 var FOV_degrees = 60;
 
+//These store each player and block
 var OTHER_PLAYER_LIST = {};
 var BLOCK_LIST = {};
 
+//These get updated from the Server on connection
 var playerSpeed = 0.05;
 var playerHeight = 1;
 
@@ -59,7 +64,8 @@ socket.on('setID', function(playerID){
 });
 
 
-//adding stuff to scene
+//First cube added to scene
+/*
 var cubeMaterials =
 [
   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('client/img/1.jpg'),side: THREE.DoubleSide}),//right side
@@ -71,15 +77,14 @@ var cubeMaterials =
 ];//each image corresponds to different side
 
 //create a material,color, or image texture
-//var material = new THREE.MeshBasicMaterial({color: 0xFFFFFF,wireframe:true});
+var material = new THREE.MeshBasicMaterial({color: 0xFFFFFF,wireframe:true});
 var material = new THREE.MeshFaceMaterial(cubeMaterials);//call with image array
 var cube = new THREE.Mesh(geometry,material);//creating cube
-//scene.add(cube);//adding cube to 3d scene
+scene.add(cube);//adding cube to 3d scene
+*/
 
 camera.position.z = 3;//initialize camera position
 camera.position.y = playerHeight + (playerHeight * 0.5);
-
-
 
 const geometryCylinder = new THREE.CylinderGeometry( 0.5, 0.5, 2, 32 );
 const materialCylinder = new THREE.MeshBasicMaterial( {color: 0x336BFF, wireframe:true} );
@@ -87,9 +92,97 @@ const materialCylinder = new THREE.MeshBasicMaterial( {color: 0x336BFF, wirefram
 
 
 //----------------Drawing other players in game-----------------------//
-//https://www.youtube.com/watch?v=EkPfhzIbp2g&ab_channel=SimonDev
+//www.youtube.com/watch?v=EkPfhzIbp2g&ab_channel=SimonDev
 //mixamo.com
 //video for player models
+let light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
+light.position.set(20, 100, 10);
+light.target.position.set(0, 0, 0);
+light.castShadow = true;
+light.shadow.bias = -0.001;
+light.shadow.mapSize.width = 2048;
+light.shadow.mapSize.height = 2048;
+light.shadow.camera.near = 0.1;
+light.shadow.camera.far = 500.0;
+light.shadow.camera.near = 0.5;
+light.shadow.camera.far = 500.0;
+light.shadow.camera.left = 100;
+light.shadow.camera.right = -100;
+light.shadow.camera.top = 100;
+light.shadow.camera.bottom = -100;
+scene.add(light);
+
+var lightColor = 0xFFFFFF;
+var lightIntensity = 2;
+light = new THREE.AmbientLight(lightColor,lightIntensity);
+scene.add(light);
+
+const loader = new THREE.CubeTextureLoader();
+const texture = loader.load([
+    './client/resources/posx.jpg',
+    './client/resources/negx.jpg',
+    './client/resources/posy.jpg',
+    './client/resources/negy.jpg',
+    './client/resources/posz.jpg',
+    './client/resources/negz.jpg',
+]);
+scene.background = texture;
+
+/*//GLTF Model loading
+function LoadGLTFModel(){
+  var loader = new GLTFLoader();
+  loader.load('./client/models/ybot.gltf', (gltf) => {
+    gltf.scene.traverse(c => {
+      c.castShadow = true;
+    });
+    scene.add(gltf.scene);
+  });
+}
+*/
+
+/*
+const clock = new THREE.Clock();
+
+//var mixer = new THREE.AnimationMixer()
+
+var mixer;
+var model;
+
+LoadModel();
+function LoadModel(){
+  const loader = new FBXLoader();
+  loader.load('./client/models/ybot.fbx', (fbx) => {
+    fbx.scale.setScalar(0.01);
+    fbx.traverse(c => {
+      c.castShadow = true;
+    });
+    fbx.name = "test";
+    scene.add(fbx);
+    const anim = new FBXLoader();
+    anim.load('./client/anims/rifle run.fbx', (animation) => {
+      mixer = new AnimationMixer(fbx);
+      const action = mixer.clipAction(animation.animations[0]);
+      action.play();
+      //mixer.update();
+      //mixer.update(clock.getDelta());
+
+      //animate(mixer);
+    });
+  });
+}
+
+var object = scene.getObjectByName("test");
+var mixer2 = new THREE.AnimationMixer(object);
+var loader = new FBXLoader();
+var model;
+loader.load('./client/anims/rifle run.fbx', (model) => {
+  const action = mixer2.clipAction(model.animations[0]);
+  action.play();
+  mixer2.update();
+})
+*///attempted model loading
+
+
 socket.on('initPlayers', function(players){
   //console.log("creating players");
   for(var i = 0; i < players.length; i++){
@@ -316,6 +409,7 @@ var sendPlayerInfo = function(){
 var update = function(){
   //cube.rotation.x += 0.01;
   //cube.rotation.y += 0.005;
+  //if (mixer) mixer.update(clock.getDelta());
 };
 
 //draw scene
