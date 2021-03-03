@@ -19,6 +19,7 @@ var FOV_degrees = 60;
 
 //These store each player and block
 var OTHER_PLAYER_LIST = {};
+var PLAYER_MODEL_LIST = {};
 var BLOCK_LIST = {};
 
 //These get updated from the Server on connection
@@ -95,6 +96,7 @@ const materialCylinder = new THREE.MeshBasicMaterial( {color: 0x336BFF, wirefram
 //www.youtube.com/watch?v=EkPfhzIbp2g&ab_channel=SimonDev
 //mixamo.com
 //video for player models
+//https://github.com/simondevyoutube/ThreeJS_Tutorial_LoadingModels
 let light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
 light.position.set(20, 100, 10);
 light.target.position.set(0, 0, 0);
@@ -141,9 +143,7 @@ function LoadGLTFModel(){
 */
 
 /*
-const clock = new THREE.Clock();
-
-//var mixer = new THREE.AnimationMixer()
+var mixer = new THREE.AnimationMixer()
 
 var mixer;
 var model;
@@ -180,7 +180,277 @@ loader.load('./client/anims/rifle run.fbx', (model) => {
   action.play();
   mixer2.update();
 })
-*///attempted model loading
+*/
+//attempted model loading
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const clock = new THREE.Clock();
+
+class BasicCharacterControls {
+  constructor(params) {
+    this._Init(params);
+  }
+
+  _Init(params) {
+    this._params = params;
+    this._move = {
+      forward: false,
+      backward: false,
+      left: false,
+      right: false,
+    };
+    this._decceleration = new THREE.Vector3(-0.0005, -0.0001, -5.0);
+    this._acceleration = new THREE.Vector3(1, 0.25, 50.0);
+    this._velocity = new THREE.Vector3(0, 0, 0);
+
+    document.addEventListener('keydown', (e) => this._onKeyDown(e), false);
+    document.addEventListener('keyup', (e) => this._onKeyUp(e), false);
+  }
+
+  _onKeyDown(event) {
+    switch (event.keyCode) {
+      case 87: // w
+        this._move.forward = true;
+        break;
+      case 65: // a
+        this._move.left = true;
+        break;
+      case 83: // s
+        this._move.backward = true;
+        break;
+      case 68: // d
+        this._move.right = true;
+        break;
+      case 38: // up
+      case 37: // left
+      case 40: // down
+      case 39: // right
+        break;
+    }
+  }
+
+  _onKeyUp(event) {
+    switch(event.keyCode) {
+      case 87: // w
+        this._move.forward = false;
+        break;
+      case 65: // a
+        this._move.left = false;
+        break;
+      case 83: // s
+        this._move.backward = false;
+        break;
+      case 68: // d
+        this._move.right = false;
+        break;
+      case 38: // up
+      case 37: // left
+      case 40: // down
+      case 39: // right
+        break;
+    }
+  }
+
+  updatePosition(x,y,z) {
+    this._params.target.position.x = x;
+    this._params.target.position.y = y;
+    this._params.target.position.z = z;
+
+
+  }
+
+  Update(timeInSeconds) {
+    const velocity = this._velocity;
+    const frameDecceleration = new THREE.Vector3(
+        velocity.x * this._decceleration.x,
+        velocity.y * this._decceleration.y,
+        velocity.z * this._decceleration.z
+    );
+    frameDecceleration.multiplyScalar(timeInSeconds);
+    frameDecceleration.z = Math.sign(frameDecceleration.z) * Math.min(
+        Math.abs(frameDecceleration.z), Math.abs(velocity.z));
+
+    velocity.add(frameDecceleration);
+
+    const controlObject = this._params.target;
+    if (controlObject.position.y == 0){
+      controlObject.position.y += 0.5;
+    }
+
+    const _Q = new THREE.Quaternion();
+    const _A = new THREE.Vector3();
+    const _R = controlObject.quaternion.clone();
+
+    if (this._move.forward) {
+      velocity.z += this._acceleration.z * timeInSeconds;
+    }
+    if (this._move.backward) {
+      velocity.z -= this._acceleration.z * timeInSeconds;
+    }
+    if (this._move.left) {
+      _A.set(0, 1, 0);
+      _Q.setFromAxisAngle(_A, Math.PI * timeInSeconds * this._acceleration.y);
+      _R.multiply(_Q);
+    }
+    if (this._move.right) {
+      _A.set(0, 1, 0);
+      _Q.setFromAxisAngle(_A, -Math.PI * timeInSeconds * this._acceleration.y);
+      _R.multiply(_Q);
+    }
+
+    controlObject.quaternion.copy(_R);
+
+    const oldPosition = new THREE.Vector3();
+    oldPosition.copy(controlObject.position);
+
+    const forward = new THREE.Vector3(0, 0, 1);
+    forward.applyQuaternion(controlObject.quaternion);
+    forward.normalize();
+
+    const sideways = new THREE.Vector3(1, 0, 0);
+    sideways.applyQuaternion(controlObject.quaternion);
+    sideways.normalize();
+
+    sideways.multiplyScalar(velocity.x * timeInSeconds);
+    forward.multiplyScalar(velocity.z * timeInSeconds);
+
+    //controlObject.position.add(forward);
+    //controlObject.position.add(sideways);
+
+    oldPosition.copy(controlObject.position);
+  }
+}
+
+
+class LoadModelDemo {
+  constructor(name, x,y,z) {
+    this.startX = x;
+    this.startY = y;
+    this.startZ = z;
+    this.name = name;
+    this._Initialize();
+  }
+
+  _Initialize() {
+
+    this._mixers = [];
+    this.object;
+    this._previousRAF = null;
+
+    this._LoadAnimatedModel();
+    // this._LoadAnimatedModelAndPlay(
+    //     './resources/dancer/', 'girl.fbx', 'dance.fbx', new THREE.Vector3(0, -1.5, 5));
+    // this._LoadAnimatedModelAndPlay(
+    //     './resources/dancer/', 'dancer.fbx', 'Silly Dancing.fbx', new THREE.Vector3(12, 0, -10));
+    // this._LoadAnimatedModelAndPlay(
+    //     './resources/dancer/', 'dancer.fbx', 'Silly Dancing.fbx', new THREE.Vector3(-12, 0, -10));
+    this._RAF();
+  }
+
+  _LoadAnimatedModel() {
+    const loader = new FBXLoader();
+    loader.load('./client/models/ybot.fbx', (fbx) => {
+      fbx.scale.setScalar(0.01);
+      fbx.traverse(c => {
+        c.castShadow = true;
+      });
+      this.object = fbx;
+      const params = {
+        target: fbx,
+        camera: camera,
+      }
+      this._controls = new BasicCharacterControls(params);//creating controls class that handles movement of object
+      fbx.name = this.name;
+
+      const anim = new FBXLoader();
+      anim.load('./client/anims/rifle aiming idle.fbx', (anim) => {
+        const m = new THREE.AnimationMixer(fbx);
+        this._mixers.push(m);
+        const idle = m.clipAction(anim.animations[0]);
+        idle.play();
+      });
+      scene.add(fbx);
+    });
+  }
+
+  _LoadAnimatedModelAndPlay(path, modelFile, animFile, offset) {
+    const loader = new FBXLoader();
+    loader.setPath(path);
+    loader.load(modelFile, (fbx) => {
+      fbx.scale.setScalar(0.1);
+      fbx.traverse(c => {
+        c.castShadow = true;
+      });
+      fbx.position.copy(offset);
+
+      const anim = new FBXLoader();
+      anim.setPath(path);
+      anim.load(animFile, (anim) => {
+        const m = new THREE.AnimationMixer(fbx);
+        this._mixers.push(m);
+        const idle = m.clipAction(anim.animations[0]);
+        idle.play();
+      });
+      scene.add(fbx);
+    });
+  }
+
+  _UpdatePosition(x,y,z) {
+    if (this._controls){
+      this._controls.updatePosition(x,y,z);
+    }
+  }
+
+  _RAF() {
+    requestAnimationFrame((t) => {
+      if (this._previousRAF === null) {
+        this._previousRAF = t;
+      }
+
+      this._RAF();
+
+      //this._threejs.render(this._scene, this._camera);
+      this._Step(t - this._previousRAF);
+      this._previousRAF = t;
+    });
+  }
+
+  _Step(timeElapsed) {
+    const timeElapsedS = timeElapsed * 0.001;
+    if (this._mixers) {
+      this._mixers.map(m => m.update(timeElapsedS));
+      //this._mixers.parent.position.x += 0.05;
+    }
+    //console.log(this._mixers.length);
+
+    if (this._controls) {
+      this._controls.Update(timeElapsedS);
+    }
+  }
+}
+
+//var loadedModel = new LoadModelDemo(0,0,0);
+//loadedModel._Step(clock.getDelta());
+//loadedModel._Step(clock.getDelta());
+
+
+
+
+
+
+
 
 
 socket.on('initPlayers', function(players){
@@ -198,6 +468,9 @@ socket.on('initPlayers', function(players){
       if(players[i].id != selfID){
         //console.log("cylinder created at "+OTHER_PLAYER_LIST[other_player_count].position.x + ","+OTHER_PLAYER_LIST[other_player_count].position.z)
         scene.add(OTHER_PLAYER_LIST[players[i].id]);
+        var playerModel = new LoadModelDemo(players[i].id + "", players[i].x,players[i].y - 1,players[i].z);
+        PLAYER_MODEL_LIST[players[i].id] = playerModel;
+        console.log("Player model added in init players for player " + players[i].id);
       }
       //console.log("other player count: " + other_player_count );
       //other_player_count = other_player_count + 1;
@@ -237,11 +510,23 @@ socket.on('newPlayer',function(newPlayer){
   newcylinder.position.z = newPlayer.z;
   OTHER_PLAYER_LIST[newPlayer.id] = newcylinder;
   scene.add(OTHER_PLAYER_LIST[newPlayer.id]);//adding new player to scene
+  var playerModel = new LoadModelDemo(newPlayer.id + "", newPlayer.x,newPlayer.y - 1,newPlayer.z);
+  console.log("Player model added in newPlayer for player " + newPlayer.id);
+  PLAYER_MODEL_LIST[newPlayer.id] = playerModel;
 });
 
 socket.on('disconnectedPlayer',function(oldPlayer){
   scene.remove(OTHER_PLAYER_LIST[oldPlayer.id]);
+  //console.log("Attempting to remove player with id " + oldPlayer.id);
+  var toRemove = scene.getObjectByName(oldPlayer.id + "");
+  // if (toRemove){
+  //   console.log("player object to remove found");
+  // } else {
+  //   console.log("Error: Player object not found to remove");
+  // }
+  scene.remove(toRemove);
   delete OTHER_PLAYER_LIST[oldPlayer.id];
+  delete PLAYER_MODEL_LIST[oldPlayer.id];
 });
 
 //end adding stuff to scene
@@ -360,6 +645,9 @@ socket.on('gameLoop', function(data){
     if (OTHER_PLAYER_LIST[data[i].id].position.z != data[i].z){
       OTHER_PLAYER_LIST[data[i].id].position.z = data[i].z;
     }
+    if(PLAYER_MODEL_LIST[data[i].id]){
+      PLAYER_MODEL_LIST[data[i].id]._UpdatePosition(data[i].x, data[i].y - 1, data[i].z);
+    }
 
   }
 
@@ -410,6 +698,8 @@ var update = function(){
   //cube.rotation.x += 0.01;
   //cube.rotation.y += 0.005;
   //if (mixer) mixer.update(clock.getDelta());
+  //loadedModel._RAF();
+  //loadedModel.object.position.x += 0.05;
 };
 
 //draw scene
