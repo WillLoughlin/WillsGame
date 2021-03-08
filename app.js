@@ -220,6 +220,7 @@ io.sockets.on('connection', function(socket){//called when player connects with 
     //console.log("Server recived X: " + data[0].playerX + " for player " + player.id);
     player.cameraX = data[0].cameraX;
     player.cameraY = data[0].cameraY;
+    player.cameraZ = data[0].cameraZ;
     player.x = data[0].playerX;
     player.y = data[0].playerY;
     player.z = data[0].playerZ;
@@ -261,6 +262,9 @@ setInterval(function(){//game loop
         y:player.y,
         z:player.z,
         id:player.id,
+        cameraX:player.cameraX,
+        cameraY:player.cameraY,
+        cameraZ:player.cameraZ,
         name:player.name,
         height:player.height,
         width:player.width,

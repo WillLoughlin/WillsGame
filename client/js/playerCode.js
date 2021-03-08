@@ -86,6 +86,7 @@ scene.add(cube);//adding cube to 3d scene
 
 camera.position.z = 3;//initialize camera position
 camera.position.y = playerHeight + (playerHeight * 0.5);
+camera.rotation.order = "YXZ";
 
 const geometryCylinder = new THREE.CylinderGeometry( 0.5, 0.5, 2, 32 );
 const materialCylinder = new THREE.MeshBasicMaterial( {color: 0x336BFF, wireframe:true} );
@@ -215,121 +216,128 @@ class BasicCharacterControls {
     this._acceleration = new THREE.Vector3(1, 0.25, 50.0);
     this._velocity = new THREE.Vector3(0, 0, 0);
 
-    document.addEventListener('keydown', (e) => this._onKeyDown(e), false);
-    document.addEventListener('keyup', (e) => this._onKeyUp(e), false);
+    //document.addEventListener('keydown', (e) => this._onKeyDown(e), false);
+    //document.addEventListener('keyup', (e) => this._onKeyUp(e), false);
   }
 
-  _onKeyDown(event) {
-    switch (event.keyCode) {
-      case 87: // w
-        this._move.forward = true;
-        break;
-      case 65: // a
-        this._move.left = true;
-        break;
-      case 83: // s
-        this._move.backward = true;
-        break;
-      case 68: // d
-        this._move.right = true;
-        break;
-      case 38: // up
-      case 37: // left
-      case 40: // down
-      case 39: // right
-        break;
-    }
-  }
+  // _onKeyDown(event) {
+  //   switch (event.keyCode) {
+  //     case 87: // w
+  //       this._move.forward = true;
+  //       break;
+  //     case 65: // a
+  //       this._move.left = true;
+  //       break;
+  //     case 83: // s
+  //       this._move.backward = true;
+  //       break;
+  //     case 68: // d
+  //       this._move.right = true;
+  //       break;
+  //     case 38: // up
+  //     case 37: // left
+  //     case 40: // down
+  //     case 39: // right
+  //       break;
+  //   }
+  // }
 
-  _onKeyUp(event) {
-    switch(event.keyCode) {
-      case 87: // w
-        this._move.forward = false;
-        break;
-      case 65: // a
-        this._move.left = false;
-        break;
-      case 83: // s
-        this._move.backward = false;
-        break;
-      case 68: // d
-        this._move.right = false;
-        break;
-      case 38: // up
-      case 37: // left
-      case 40: // down
-      case 39: // right
-        break;
-    }
-  }
+  // _onKeyUp(event) {
+  //   switch(event.keyCode) {
+  //     case 87: // w
+  //       this._move.forward = false;
+  //       break;
+  //     case 65: // a
+  //       this._move.left = false;
+  //       break;
+  //     case 83: // s
+  //       this._move.backward = false;
+  //       break;
+  //     case 68: // d
+  //       this._move.right = false;
+  //       break;
+  //     case 38: // up
+  //     case 37: // left
+  //     case 40: // down
+  //     case 39: // right
+  //       break;
+  //   }
+  // }
 
   updatePosition(x,y,z) {
     this._params.target.position.x = x;
     this._params.target.position.y = y;
     this._params.target.position.z = z;
+  }
 
-
+  updateDirection(x,y,z) {
+    //var dir = new THREE.Vector3(0,x,0);
+    //console.log("X: " + x);
+    //this._params.target.rotation.x = y;
+    this._params.target.rotation.y = y;
+    //this._params.target.rotation.z = z;
+    //.rotation.set(0,x,0);
   }
 
   Update(timeInSeconds) {
-    const velocity = this._velocity;
-    const frameDecceleration = new THREE.Vector3(
-        velocity.x * this._decceleration.x,
-        velocity.y * this._decceleration.y,
-        velocity.z * this._decceleration.z
-    );
-    frameDecceleration.multiplyScalar(timeInSeconds);
-    frameDecceleration.z = Math.sign(frameDecceleration.z) * Math.min(
-        Math.abs(frameDecceleration.z), Math.abs(velocity.z));
+    // const velocity = this._velocity;
+    // const frameDecceleration = new THREE.Vector3(
+    //     velocity.x * this._decceleration.x,
+    //     velocity.y * this._decceleration.y,
+    //     velocity.z * this._decceleration.z
+    // );
+    // frameDecceleration.multiplyScalar(timeInSeconds);
+    // frameDecceleration.z = Math.sign(frameDecceleration.z) * Math.min(
+    //     Math.abs(frameDecceleration.z), Math.abs(velocity.z));
+    //
+    // velocity.add(frameDecceleration);
+    //
+    // const controlObject = this._params.target;
+    // if (controlObject.position.y == 0){
+    //   controlObject.position.y += 0.5;
+    // }
+    //
+    // const _Q = new THREE.Quaternion();
+    // const _A = new THREE.Vector3();
+    // const _R = controlObject.quaternion.clone();
+    //
+    // if (this._move.forward) {
+    //   velocity.z += this._acceleration.z * timeInSeconds;
+    // }
+    // if (this._move.backward) {
+    //   velocity.z -= this._acceleration.z * timeInSeconds;
+    // }
+    // if (this._move.left) {
+    //   _A.set(0, 1, 0);
+    //   _Q.setFromAxisAngle(_A, Math.PI * timeInSeconds * this._acceleration.y);
+    //   _R.multiply(_Q);
+    // }
+    // if (this._move.right) {
+    //   _A.set(0, 1, 0);
+    //   _Q.setFromAxisAngle(_A, -Math.PI * timeInSeconds * this._acceleration.y);
+    //   _R.multiply(_Q);
+    // }
 
-    velocity.add(frameDecceleration);
-
-    const controlObject = this._params.target;
-    if (controlObject.position.y == 0){
-      controlObject.position.y += 0.5;
-    }
-
-    const _Q = new THREE.Quaternion();
-    const _A = new THREE.Vector3();
-    const _R = controlObject.quaternion.clone();
-
-    if (this._move.forward) {
-      velocity.z += this._acceleration.z * timeInSeconds;
-    }
-    if (this._move.backward) {
-      velocity.z -= this._acceleration.z * timeInSeconds;
-    }
-    if (this._move.left) {
-      _A.set(0, 1, 0);
-      _Q.setFromAxisAngle(_A, Math.PI * timeInSeconds * this._acceleration.y);
-      _R.multiply(_Q);
-    }
-    if (this._move.right) {
-      _A.set(0, 1, 0);
-      _Q.setFromAxisAngle(_A, -Math.PI * timeInSeconds * this._acceleration.y);
-      _R.multiply(_Q);
-    }
-
-    controlObject.quaternion.copy(_R);
-
-    const oldPosition = new THREE.Vector3();
-    oldPosition.copy(controlObject.position);
-
-    const forward = new THREE.Vector3(0, 0, 1);
-    forward.applyQuaternion(controlObject.quaternion);
-    forward.normalize();
-
-    const sideways = new THREE.Vector3(1, 0, 0);
-    sideways.applyQuaternion(controlObject.quaternion);
-    sideways.normalize();
-
-    sideways.multiplyScalar(velocity.x * timeInSeconds);
-    forward.multiplyScalar(velocity.z * timeInSeconds);
+    // controlObject.quaternion.copy(_R);
+    //
+    // const oldPosition = new THREE.Vector3();
+    // oldPosition.copy(controlObject.position);
+    //
+    // const forward = new THREE.Vector3(0, 0, 1);
+    // forward.applyQuaternion(controlObject.quaternion);
+    // forward.normalize();
+    //
+    // const sideways = new THREE.Vector3(1, 0, 0);
+    // sideways.applyQuaternion(controlObject.quaternion);
+    // sideways.normalize();
+    //
+    // sideways.multiplyScalar(velocity.x * timeInSeconds);
+    // forward.multiplyScalar(velocity.z * timeInSeconds);
 
     //controlObject.position.add(forward);
     //controlObject.position.add(sideways);
 
-    oldPosition.copy(controlObject.position);
+    // oldPosition.copy(controlObject.position);
   }
 }
 
@@ -350,19 +358,14 @@ class LoadModelDemo {
     this._previousRAF = null;
 
     this._LoadAnimatedModel();
-    // this._LoadAnimatedModelAndPlay(
-    //     './resources/dancer/', 'girl.fbx', 'dance.fbx', new THREE.Vector3(0, -1.5, 5));
-    // this._LoadAnimatedModelAndPlay(
-    //     './resources/dancer/', 'dancer.fbx', 'Silly Dancing.fbx', new THREE.Vector3(12, 0, -10));
-    // this._LoadAnimatedModelAndPlay(
-    //     './resources/dancer/', 'dancer.fbx', 'Silly Dancing.fbx', new THREE.Vector3(-12, 0, -10));
+
     this._RAF();
   }
 
   _LoadAnimatedModel() {
     const loader = new FBXLoader();
     loader.load('./client/models/ybot.fbx', (fbx) => {
-      fbx.scale.setScalar(0.01);
+      fbx.scale.setScalar(0.0115);
       fbx.traverse(c => {
         c.castShadow = true;
       });
@@ -413,6 +416,12 @@ class LoadModelDemo {
     }
   }
 
+  _UpdateDirection(x,y,z) {
+    if (this._controls){
+      this._controls.updateDirection(x,y,z);
+    }
+  }
+
   _RAF() {
     requestAnimationFrame((t) => {
       if (this._previousRAF === null) {
@@ -435,22 +444,13 @@ class LoadModelDemo {
     }
     //console.log(this._mixers.length);
 
-    if (this._controls) {
-      this._controls.Update(timeElapsedS);
-    }
+    // if (this._controls) {
+    //   this._controls.Update(timeElapsedS);
+    // }
   }
 }
 
 //var loadedModel = new LoadModelDemo(0,0,0);
-//loadedModel._Step(clock.getDelta());
-//loadedModel._Step(clock.getDelta());
-
-
-
-
-
-
-
 
 
 socket.on('initPlayers', function(players){
@@ -647,6 +647,7 @@ socket.on('gameLoop', function(data){
     }
     if(PLAYER_MODEL_LIST[data[i].id]){
       PLAYER_MODEL_LIST[data[i].id]._UpdatePosition(data[i].x, data[i].y - 1, data[i].z);
+      PLAYER_MODEL_LIST[data[i].id]._UpdateDirection(data[i].cameraX,data[i].cameraY,data[i].cameraZ);
     }
 
   }
@@ -669,7 +670,19 @@ socket.on('gameLoop', function(data){
 //Send player info to server
 var sendPlayerInfo = function(){
   var data = [];
-  camera.getWorldDirection(target);//direction is copied into vector "target"
+  //camera.getWorldDirection(target);//direction is copied into vector "target"
+  const euler = new THREE.Euler();
+  const rotation = euler.setFromQuaternion(camera.quaternion);
+
+  var vector = new THREE.Vector3();
+  camera.getWorldDirection(vector);
+
+  var theta = Math.atan2(vector.x,vector.z);
+
+
+  // const radians = rotation.z > 0
+  //   ? rotation.z
+  //   : (2 * Math.PI) + rotation.z;
   var decimal_places = 6;
   var posX = camera.position.x;
   var stringPositionX = posX.toFixed(decimal_places);
@@ -684,8 +697,9 @@ var sendPlayerInfo = function(){
   posZ = parseFloat(stringPositionZ);
   //console.log("send player X: " + posX);
   data.push({
-    cameraX:target.x,
-    cameraY:target.y,
+    cameraX:rotation.x,
+    cameraY:theta,
+    cameraZ:rotation.z,
     playerX:posX,
     playerY:posY,
     playerZ:posZ
