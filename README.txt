@@ -2,10 +2,7 @@ WillsGame
 By Will Loughlin
 
 This project is a three dimensional online multiplayer game hosted
-on heroku at willsgame.herokuapp.com.
-
-Access the game by copying and pasting the link
-or by clicking on this hyperlink: <a href=“http://willsgame.herokuapp.com”>Wills Game</a>
+on heroku at http://willsgame.herokuapp.com.
 
 You don't need to install anything to run this project, just go to
 the link and click on the screen to use the mouse to control the
