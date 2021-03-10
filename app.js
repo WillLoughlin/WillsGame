@@ -19,6 +19,7 @@ serv.listen(PORT,function(){
 //git add .
 //git commit -m "commit notes"
 //git push heroku master
+//git push origin master
 
 //var THREE = require('./client/js/three.js');
 

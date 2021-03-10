@@ -24,7 +24,7 @@ var BLOCK_LIST = {};
 
 //These get updated from the Server on connection
 var playerSpeed = 0.05;
-var playerHeight = 1;
+var playerHeight = 2;
 
 //These variables used for movement
 let moveForward = false;
@@ -266,7 +266,7 @@ class BasicCharacterControls {
 
   updatePosition(x,y,z) {
     this._params.target.position.x = x;
-    this._params.target.position.y = y;
+    this._params.target.position.y = y -1;
     this._params.target.position.z = z;
   }
 
@@ -365,7 +365,7 @@ class LoadModelDemo {
   _LoadAnimatedModel() {
     const loader = new FBXLoader();
     loader.load('./client/models/ybot.fbx', (fbx) => {
-      fbx.scale.setScalar(0.0115);
+      fbx.scale.setScalar(0.013);
       fbx.traverse(c => {
         c.castShadow = true;
       });
@@ -462,16 +462,16 @@ socket.on('initPlayers', function(players){
       var cylinder = new THREE.Mesh( geometryCylinder, materialCylinder );
       //console.log("Player position: " + players[i].x + "," +players[i].z);
       cylinder.position.x = players[i].x;
-      cylinder.position.y = players[i].y;
+      cylinder.position.y = players[i].y - 1;
       cylinder.position.z = players[i].z;
       OTHER_PLAYER_LIST[players[i].id] = cylinder;
-      if(players[i].id != selfID){
+      //if(players[i].id != selfID){
         //console.log("cylinder created at "+OTHER_PLAYER_LIST[other_player_count].position.x + ","+OTHER_PLAYER_LIST[other_player_count].position.z)
         scene.add(OTHER_PLAYER_LIST[players[i].id]);
         var playerModel = new LoadModelDemo(players[i].id + "", players[i].x,players[i].y - 1,players[i].z);
         PLAYER_MODEL_LIST[players[i].id] = playerModel;
         console.log("Player model added in init players for player " + players[i].id);
-      }
+      //}
       //console.log("other player count: " + other_player_count );
       //other_player_count = other_player_count + 1;
   }
@@ -640,7 +640,7 @@ socket.on('gameLoop', function(data){
       OTHER_PLAYER_LIST[data[i].id].position.x = data[i].x;
     }
     if(OTHER_PLAYER_LIST[data[i].id].position.y != data[i].y){
-        OTHER_PLAYER_LIST[data[i].id].position.y = data[i].y;
+        OTHER_PLAYER_LIST[data[i].id].position.y = data[i].y - 1;
     }
     if (OTHER_PLAYER_LIST[data[i].id].position.z != data[i].z){
       OTHER_PLAYER_LIST[data[i].id].position.z = data[i].z;
