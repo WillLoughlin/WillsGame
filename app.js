@@ -269,7 +269,11 @@ setInterval(function(){//game loop
         name:player.name,
         height:player.height,
         width:player.width,
-        type:player.type
+        type:player.type,
+        pressingRight:player.pressingRight,
+        pressingLeft:player.pressingLeft,
+        pressingUp:player.pressingUp,
+        pressingDown:player.pressingDown
       });
   }
 

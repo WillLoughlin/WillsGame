@@ -519,11 +519,6 @@ socket.on('disconnectedPlayer',function(oldPlayer){
   scene.remove(OTHER_PLAYER_LIST[oldPlayer.id]);
   //console.log("Attempting to remove player with id " + oldPlayer.id);
   var toRemove = scene.getObjectByName(oldPlayer.id + "");
-  // if (toRemove){
-  //   console.log("player object to remove found");
-  // } else {
-  //   console.log("Error: Player object not found to remove");
-  // }
   scene.remove(toRemove);
   delete OTHER_PLAYER_LIST[oldPlayer.id];
   delete PLAYER_MODEL_LIST[oldPlayer.id];
@@ -566,7 +561,7 @@ document.onkeydown  = function ( event ) {//called when keys are pressed
 	case 'ArrowUp':
 	case 'KeyW':
 		moveForward = true;//this will happen if you press w or uparrow
-    socket.emit('keyPress', {inputId:'right',state:true});
+    socket.emit('keyPress', {inputId:'up',state:true});
 		break;
 
 	case 'ArrowLeft':
