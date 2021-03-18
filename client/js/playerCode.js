@@ -26,6 +26,13 @@ var BLOCK_LIST = {};
 var playerSpeed = 0.05;
 var playerHeight = 2;
 
+var playerModelOffsetX = 0;
+var playerModelOffsetY = -1;
+var playerModelOffsetZ = 0;
+
+var playerModelOffsetForward = -0.3;
+var playerModelOffsetRight = 1;
+
 //These variables used for movement
 let moveForward = false;
 let moveBackward = false;
@@ -265,9 +272,9 @@ class BasicCharacterControls {
   // }
 
   updatePosition(x,y,z) {
-    this._params.target.position.x = x;
-    this._params.target.position.y = y -1;
-    this._params.target.position.z = z;
+    this._params.target.position.x = x + playerModelOffsetX;
+    this._params.target.position.y = y + playerModelOffsetY;
+    this._params.target.position.z = z + playerModelOffsetZ;
   }
 
   updateDirection(x,y,z) {
@@ -275,8 +282,21 @@ class BasicCharacterControls {
     //console.log("X: " + x);
     //this._params.target.rotation.x = y;
     this._params.target.rotation.y = y;
+
+    var theta = -1 * y + Math.PI / 2;
+    var newXoffset = playerModelOffsetForward * Math.cos(theta);
+    this._params.target.position.x = this._params.target.position.x + newXoffset;
+
+    var newZoffset = playerModelOffsetForward * Math.sin(theta);
+    this._params.target.position.z = this._params.target.position.z + newZoffset;
+
     //this._params.target.rotation.z = z;
     //.rotation.set(0,x,0);
+  }
+
+  updateDirectionSelf(cameraX,cameraZ){
+    this._params.target.rotation.x = cameraX;
+    //this._params.target.rotation.z = cameraZ;
   }
 
   Update(timeInSeconds) {
@@ -416,9 +436,16 @@ class LoadModelDemo {
     }
   }
 
+
   _UpdateDirection(x,y,z) {
     if (this._controls){
       this._controls.updateDirection(x,y,z);
+    }
+  }
+
+  _UpdateDirectionSelf(cameraX,cameraZ){
+    if (this._controls){
+      this._controls.updateDirectionSelf(cameraX,cameraZ);
     }
   }
 
@@ -452,6 +479,7 @@ class LoadModelDemo {
 
 //var loadedModel = new LoadModelDemo(0,0,0);
 
+var selfPlayerModel;
 
 socket.on('initPlayers', function(players){
   //console.log("creating players");
@@ -465,11 +493,17 @@ socket.on('initPlayers', function(players){
       cylinder.position.y = players[i].y - 1;
       cylinder.position.z = players[i].z;
       OTHER_PLAYER_LIST[players[i].id] = cylinder;
+      scene.add(OTHER_PLAYER_LIST[players[i].id]);
+
       //if(players[i].id != selfID){
         //console.log("cylinder created at "+OTHER_PLAYER_LIST[other_player_count].position.x + ","+OTHER_PLAYER_LIST[other_player_count].position.z)
-        scene.add(OTHER_PLAYER_LIST[players[i].id]);
+        //scene.add(OTHER_PLAYER_LIST[players[i].id]);
         var playerModel = new LoadModelDemo(players[i].id + "", players[i].x,players[i].y - 1,players[i].z);
         PLAYER_MODEL_LIST[players[i].id] = playerModel;
+        if(players[i].id == selfID){
+          selfPlayerModel = playerModel;
+        }
+
         console.log("Player model added in init players for player " + players[i].id);
       //}
       //console.log("other player count: " + other_player_count );
@@ -561,24 +595,28 @@ document.onkeydown  = function ( event ) {//called when keys are pressed
 	case 'ArrowUp':
 	case 'KeyW':
 		moveForward = true;//this will happen if you press w or uparrow
+    //selfPlayerModel.updatePosition(camera.position.x,camera.position.y,camera.position.z);
     socket.emit('keyPress', {inputId:'up',state:true});
 		break;
 
 	case 'ArrowLeft':
 	case 'KeyA':
 		moveLeft = true;
+    //selfPlayerModel.updatePosition(camera.position.x,camera.position.y,camera.position.z);
     socket.emit('keyPress', {inputId:'left',state:true});
 		break;
 
 	case 'ArrowDown':
 	case 'KeyS':
 		moveBackward = true;
+    //selfPlayerModel.updatePosition(camera.position.x,camera.position.y,camera.position.z);
     socket.emit('keyPress', {inputId:'down',state:true});
 		break;
 
 	case 'ArrowRight':
 	case 'KeyD':
 		moveRight = true;
+    //selfPlayerModel.updatePosition(camera.position.x,camera.position.y,camera.position.z);
     socket.emit('keyPress', {inputId:'right',state:true});
 		break;
 
@@ -624,6 +662,8 @@ var target = new THREE.Vector3();//used to save camera direction
 var oldX = 0;
 var oldY = 0;
 
+var selfDirection;
+
 socket.on('gameLoop', function(data){
   //console.log("test");
   //updating position of other players in game
@@ -641,8 +681,12 @@ socket.on('gameLoop', function(data){
       OTHER_PLAYER_LIST[data[i].id].position.z = data[i].z;
     }
     if(PLAYER_MODEL_LIST[data[i].id]){
-      PLAYER_MODEL_LIST[data[i].id]._UpdatePosition(data[i].x, data[i].y - 1, data[i].z);
+      PLAYER_MODEL_LIST[data[i].id]._UpdatePosition(data[i].x + playerModelOffsetX, data[i].y + playerModelOffsetY, data[i].z + playerModelOffsetZ);
       PLAYER_MODEL_LIST[data[i].id]._UpdateDirection(data[i].cameraX,data[i].cameraY,data[i].cameraZ);
+      if(data[i].id == selfID){
+        selfDirection = data[i].cameraY;
+        PLAYER_MODEL_LIST[data[i].id]._UpdateDirectionSelf(data[i].cameraX,data[i].cameraZ);
+      }
     }
 
   }
@@ -654,6 +698,14 @@ socket.on('gameLoop', function(data){
 
   controls.moveRight(playerSpeed * direction.x);
   controls.moveForward(playerSpeed * direction.z);
+
+  //console.log("direction z: " + direction.z + " direction x: " + direction.x)
+  //console.log(" ")
+
+  if(selfPlayerModel){
+    selfPlayerModel._UpdatePosition(camera.position.x + playerModelOffsetX, camera.position.y + playerModelOffsetY,  camera.position.z + playerModelOffsetZ);
+    selfPlayerModel._UpdateDirection(0,selfDirection,0);
+  }
 
   sendPlayerInfo();
   update();
@@ -704,6 +756,14 @@ var sendPlayerInfo = function(){
 
 //game logic
 var update = function(){
+  OTHER_PLAYER_LIST[selfID].position.x = camera.position.x + playerModelOffsetX;
+  OTHER_PLAYER_LIST[selfID].position.y = camera.position.y + playerModelOffsetY;
+  OTHER_PLAYER_LIST[selfID].position.z = camera.position.z + playerModelOffsetZ;
+
+
+
+
+
   //cube.rotation.x += 0.01;
   //cube.rotation.y += 0.005;
   //if (mixer) mixer.update(clock.getDelta());
