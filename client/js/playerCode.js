@@ -27,11 +27,12 @@ var playerSpeed = 0.05;
 var playerHeight = 2;
 
 var playerModelOffsetX = 0;
-var playerModelOffsetY = -1;
+var playerModelOffsetY = 0;
 var playerModelOffsetZ = 0;
 
-var playerModelOffsetForward = -0.3;
-var playerModelOffsetRight = 1;
+//var playerModelOffsetForward = -0.3;
+var playerModelOffsetForward = 0;
+var playerModelOffsetRight = 0;
 
 //These variables used for movement
 let moveForward = false;
@@ -295,7 +296,12 @@ class BasicCharacterControls {
   }
 
   updateDirectionSelf(cameraX,cameraZ){
-    this._params.target.rotation.x = cameraX;
+    //this._params.target.rotation.x = cameraX;
+    this._params.target.position.copy(camera.position);
+    this._params.target.rotation.copy(camera.rotation);
+    this._params.target.rotation.x = -1 * this._params.target.rotation.x;
+    this._params.target.updateMatrix();
+    //this._params.target.translateZ(- 10);
     //this._params.target.rotation.z = cameraZ;
   }
 
@@ -384,7 +390,7 @@ class LoadModelDemo {
 
   _LoadAnimatedModel() {
     const loader = new FBXLoader();
-    loader.load('./client/models/ybot.fbx', (fbx) => {
+    loader.load('./client/models/ybot6.fbx', (fbx) => {
       fbx.scale.setScalar(0.013);
       fbx.traverse(c => {
         c.castShadow = true;
