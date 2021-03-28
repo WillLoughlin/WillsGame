@@ -143,6 +143,7 @@ scene.background = texture;
 
 //change emmision to change color
 //GLTF Model loading
+/*
 function LoadGLTFModel(){
   var loader = new GLTFLoader();
   loader.load('./client/models/gun4.glb', (gltf) => {
@@ -154,61 +155,7 @@ function LoadGLTFModel(){
 }
 
 LoadGLTFModel();
-
-
-/*
-var mixer = new THREE.AnimationMixer()
-
-var mixer;
-var model;
-
-LoadModel();
-function LoadModel(){
-  const loader = new FBXLoader();
-  loader.load('./client/models/ybot.fbx', (fbx) => {
-    fbx.scale.setScalar(0.01);
-    fbx.traverse(c => {
-      c.castShadow = true;
-    });
-    fbx.name = "test";
-    scene.add(fbx);
-    const anim = new FBXLoader();
-    anim.load('./client/anims/rifle run.fbx', (animation) => {
-      mixer = new AnimationMixer(fbx);
-      const action = mixer.clipAction(animation.animations[0]);
-      action.play();
-      //mixer.update();
-      //mixer.update(clock.getDelta());
-
-      //animate(mixer);
-    });
-  });
-}
-
-var object = scene.getObjectByName("test");
-var mixer2 = new THREE.AnimationMixer(object);
-var loader = new FBXLoader();
-var model;
-loader.load('./client/anims/rifle run.fbx', (model) => {
-  const action = mixer2.clipAction(model.animations[0]);
-  action.play();
-  mixer2.update();
-})
 */
-//attempted model loading
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const clock = new THREE.Clock();
 
@@ -232,50 +179,6 @@ class BasicCharacterControls {
     //document.addEventListener('keydown', (e) => this._onKeyDown(e), false);
     //document.addEventListener('keyup', (e) => this._onKeyUp(e), false);
   }
-
-  // _onKeyDown(event) {
-  //   switch (event.keyCode) {
-  //     case 87: // w
-  //       this._move.forward = true;
-  //       break;
-  //     case 65: // a
-  //       this._move.left = true;
-  //       break;
-  //     case 83: // s
-  //       this._move.backward = true;
-  //       break;
-  //     case 68: // d
-  //       this._move.right = true;
-  //       break;
-  //     case 38: // up
-  //     case 37: // left
-  //     case 40: // down
-  //     case 39: // right
-  //       break;
-  //   }
-  // }
-
-  // _onKeyUp(event) {
-  //   switch(event.keyCode) {
-  //     case 87: // w
-  //       this._move.forward = false;
-  //       break;
-  //     case 65: // a
-  //       this._move.left = false;
-  //       break;
-  //     case 83: // s
-  //       this._move.backward = false;
-  //       break;
-  //     case 68: // d
-  //       this._move.right = false;
-  //       break;
-  //     case 38: // up
-  //     case 37: // left
-  //     case 40: // down
-  //     case 39: // right
-  //       break;
-  //   }
-  // }
 
   updatePosition(x,y,z) {
     this._params.target.position.x = x + playerModelOffsetX;
@@ -301,16 +204,6 @@ class BasicCharacterControls {
   }
 
   updateDirectionSelf(cameraX,cameraZ){
-    //this._params.target.rotation.x = cameraX;
-    this._params.target.position.copy(camera.position);
-    this._params.target.rotation.copy(camera.rotation);
-    this._params.target.rotation.x = -1 * this._params.target.rotation.x;
-    this._params.target.updateMatrix();
-    //this._params.target.translateZ(- 10);
-    //this._params.target.rotation.z = cameraZ;
-  }
-
-  updateDirectionSelfGun(cameraX,cameraZ){
     this._params.target.position.copy(camera.position);
     this._params.target.rotation.copy(camera.rotation);
 
@@ -321,64 +214,6 @@ class BasicCharacterControls {
   }
 
   Update(timeInSeconds) {
-    // const velocity = this._velocity;
-    // const frameDecceleration = new THREE.Vector3(
-    //     velocity.x * this._decceleration.x,
-    //     velocity.y * this._decceleration.y,
-    //     velocity.z * this._decceleration.z
-    // );
-    // frameDecceleration.multiplyScalar(timeInSeconds);
-    // frameDecceleration.z = Math.sign(frameDecceleration.z) * Math.min(
-    //     Math.abs(frameDecceleration.z), Math.abs(velocity.z));
-    //
-    // velocity.add(frameDecceleration);
-    //
-    // const controlObject = this._params.target;
-    // if (controlObject.position.y == 0){
-    //   controlObject.position.y += 0.5;
-    // }
-    //
-    // const _Q = new THREE.Quaternion();
-    // const _A = new THREE.Vector3();
-    // const _R = controlObject.quaternion.clone();
-    //
-    // if (this._move.forward) {
-    //   velocity.z += this._acceleration.z * timeInSeconds;
-    // }
-    // if (this._move.backward) {
-    //   velocity.z -= this._acceleration.z * timeInSeconds;
-    // }
-    // if (this._move.left) {
-    //   _A.set(0, 1, 0);
-    //   _Q.setFromAxisAngle(_A, Math.PI * timeInSeconds * this._acceleration.y);
-    //   _R.multiply(_Q);
-    // }
-    // if (this._move.right) {
-    //   _A.set(0, 1, 0);
-    //   _Q.setFromAxisAngle(_A, -Math.PI * timeInSeconds * this._acceleration.y);
-    //   _R.multiply(_Q);
-    // }
-
-    // controlObject.quaternion.copy(_R);
-    //
-    // const oldPosition = new THREE.Vector3();
-    // oldPosition.copy(controlObject.position);
-    //
-    // const forward = new THREE.Vector3(0, 0, 1);
-    // forward.applyQuaternion(controlObject.quaternion);
-    // forward.normalize();
-    //
-    // const sideways = new THREE.Vector3(1, 0, 0);
-    // sideways.applyQuaternion(controlObject.quaternion);
-    // sideways.normalize();
-    //
-    // sideways.multiplyScalar(velocity.x * timeInSeconds);
-    // forward.multiplyScalar(velocity.z * timeInSeconds);
-
-    //controlObject.position.add(forward);
-    //controlObject.position.add(sideways);
-
-    // oldPosition.copy(controlObject.position);
   }
 }
 
@@ -431,7 +266,7 @@ class LoadGun {
 
   _UpdateDirectionSelf(cameraX,cameraZ){
     if (this._controls){
-      this._controls.updateDirectionSelfGun(cameraX,cameraZ);
+      this._controls.updateDirectionSelf(cameraX,cameraZ);
     }
   }
 }
@@ -477,28 +312,6 @@ class LoadModelDemo {
 
       const anim = new FBXLoader();
       anim.load('./client/anims/rifle aiming idle.fbx', (anim) => {
-        const m = new THREE.AnimationMixer(fbx);
-        this._mixers.push(m);
-        const idle = m.clipAction(anim.animations[0]);
-        idle.play();
-      });
-      scene.add(fbx);
-    });
-  }
-
-  _LoadAnimatedModelAndPlay(path, modelFile, animFile, offset) {
-    const loader = new FBXLoader();
-    loader.setPath(path);
-    loader.load(modelFile, (fbx) => {
-      fbx.scale.setScalar(0.1);
-      fbx.traverse(c => {
-        c.castShadow = true;
-      });
-      fbx.position.copy(offset);
-
-      const anim = new FBXLoader();
-      anim.setPath(path);
-      anim.load(animFile, (anim) => {
         const m = new THREE.AnimationMixer(fbx);
         this._mixers.push(m);
         const idle = m.clipAction(anim.animations[0]);
@@ -800,7 +613,7 @@ socket.on('gameLoop', function(data){
 
   if(selfPlayerModel){
     selfPlayerModel._UpdatePosition(camera.position.x + playerModelOffsetX, camera.position.y + playerModelOffsetY,  camera.position.z + playerModelOffsetZ);
-    selfPlayerModel._UpdateDirection(0,selfDirection,0);
+    //selfPlayerModel._UpdateDirection(0,selfDirection,0);
   }
 
   if(selfGun){
@@ -860,13 +673,6 @@ var update = function(){
   OTHER_PLAYER_LIST[selfID].position.y = camera.position.y + playerModelOffsetY;
   OTHER_PLAYER_LIST[selfID].position.z = camera.position.z + playerModelOffsetZ;
 
-
-
-  //cube.rotation.x += 0.01;
-  //cube.rotation.y += 0.005;
-  //if (mixer) mixer.update(clock.getDelta());
-  //loadedModel._RAF();
-  //loadedModel.object.position.x += 0.05;
 };
 
 //draw scene
