@@ -137,6 +137,8 @@ for (var i = -4; i < 5; i++){
   }
 }
 
+BLOCK_LIST[counter] = new Block(counter, 0, 1, 0, "Block",1,1,"client/img/1.jpg", "client/img/hardwood_floor.jpg", "client/img/1.jpg");
+counter++;
 
 //Socket.io used for multiplayer functionality
 var io = require('socket.io')(serv,{});

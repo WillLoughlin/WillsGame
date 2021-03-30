@@ -29,6 +29,7 @@ var playerHeight = 2;
 
 var velocityUp = 0;
 var gravSpeed = 0.01;
+var jumpSpeed = 0.2
 
 //These variables used for movement
 let moveForward = false;
@@ -465,7 +466,7 @@ document.onkeydown  = function ( event ) {//called when keys are pressed
 		break;
 
 	case 'Space':
-		if ( canJump === true ) velocityUp = 0.5;
+		if ( canJump === true ) velocityUp = jumpSpeed;
 		canJump = false;
 		break;
 	}
@@ -565,18 +566,11 @@ socket.on('gameLoop', function(data){
     velocityUp = 0;
   }
 
-  if (camera.position.y < -3) {
-    camera.position.y = -3;
+  if (camera.position.y < 1) {
+    camera.position.y = 1;
     canJump = true;
   }
 
-
-  // if (!checkCollisionPlayerTopBlocks()){
-  //   camera.position.y = camera.position.y - gravSpeed;
-  // }
-
-  //console.log("direction z: " + direction.z + " direction x: " + direction.x)
-  //console.log(" ")
 
   if(selfPlayerModel){
     selfPlayerModel._UpdatePosition(camera.position.x, camera.position.y,  camera.position.z);
@@ -642,6 +636,28 @@ var update = function(){
 };
 
 var checkCollisionPlayerSideBlocks = function(){
+  var playerX = camera.position.x;
+  var playerY = camera.position.y;
+  var playerZ = camera.position.z;
+
+  for (var i = 0; i < numBlocks; i++){
+    var topBound = BLOCK_LIST[i].position.y + 0.5;
+    var bottomBound = topBound - 1;
+
+    if ((playerY <= topBound && playerY > bottomBound) || (playerY -2  <= topBound && playerY - 2 > bottomBound) || (BLOCK_LIST[i].position.y > playerY -2 && BLOCK_LIST[i].position.y < playerY)) {
+      var circleDistX = Math.abs(playerX - BLOCK_LIST[i].position.x);
+      var circleDistZ = Math.abs(playerZ - BLOCK_LIST[i].position.z);
+
+      if (circleDistX < 1 && circleDistZ < 1){
+        return true;
+      }
+      var cornerDist = Math.pow((circleDistX - 0.5),2) + Math.pow((circleDistZ - 0.5),2);
+
+      if (Math.sqrt(cornerDist) <= 0.5){
+        return true;
+      }
+    }
+  }
   return false;
 }
 
@@ -658,13 +674,35 @@ var checkCollisionPlayerTopBlocks = function(playerX,playerY,playerZ) {
     if (playerY <= topBound && playerY > bottomBound && playerZ < forwardBound && playerZ > backBound && playerX < rightBound && playerX > leftBound){
       return true;//top of player hit block
     }
-    if ((playerY-2) <= topBound && (playerY-2) > bottomBound && playerZ < forwardBound && playerZ > backBound && playerX < rightBound && playerX > leftBound){
-      canJump = true;
-      return true;//bottom of player hit block
+
+    if (playerY-2 <= topBound && playerY-2 > bottomBound){
+
+    var circleDistX = Math.abs(playerX - BLOCK_LIST[i].position.x);
+    var circleDistZ = Math.abs(playerZ - BLOCK_LIST[i].position.z);
+
+    if (circleDistX < 1 && circleDistZ < 1){
+      if (circleDistX <= 0.5 || circleDistZ){
+        canJump = true;
+        return true;
+      }
+
+      var cornerDist = Math.pow((circleDistX - 0.5),2) + Math.pow((circleDistZ - 0.5),2);
+
+      if (Math.sqrt(cornerDist) <= 0.5){
+        canJump = true;
+        return true;
+      }
+    }
+
+      // if ((playerY-2) <= topBound && (playerY-2) > bottomBound && playerZ < forwardBound && playerZ > backBound && playerX < rightBound && playerX > leftBound){
+      //   canJump = true;
+      //   return true;//bottom of player hit block
+      // }
     }
   }
   return false;
 }
+
 
 var distanceTwoPoints = function(x1,y1,z1,x2,y2,z2){
   var sum = Math.pow((x1-x2),2) + Math.pow((y1-y2),2) + Math.pow((z1-z2),2);
