@@ -93,8 +93,9 @@ camera.position.z = 3;//initialize camera position
 camera.position.y = playerHeight + (playerHeight * 0.5);
 camera.rotation.order = "YXZ";
 
-const geometryCylinder = new THREE.CylinderGeometry( 0.5, 0.5, 2, 32 );
-const materialCylinder = new THREE.MeshBasicMaterial( {color: 0x336BFF, wireframe:true} );
+//const geometryCylinder = new THREE.CylinderGeometry( 0.5, 0.5, 2, 32 );
+const geometryPlayerBox = new THREE.BoxGeometry(0.5,2,0.5);
+const materialBox = new THREE.MeshBasicMaterial( {color: 0x336BFF, wireframe:true} );
 //cylinder = new THREE.Mesh( geometry, material );
 
 
@@ -319,12 +320,14 @@ var selfGun;
 socket.on('initPlayers', function(players){
   //console.log("creating players");
   for(var i = 0; i < players.length; i++){
-      var cylinder = new THREE.Mesh( geometryCylinder, materialCylinder );
+      //var cylinder = new THREE.Mesh( geometryCylinder, materialCylinder );
+      var box = new THREE.Mesh(geometryPlayerBox,materialBox);
       //console.log("Player position: " + players[i].x + "," +players[i].z);
-      cylinder.position.x = players[i].x;
-      cylinder.position.y = players[i].y - 1;
-      cylinder.position.z = players[i].z;
-      OTHER_PLAYER_LIST[players[i].id] = cylinder;
+      box.position.x = players[i].x;
+      box.position.y = players[i].y - 1;
+      box.position.z = players[i].z;
+
+      OTHER_PLAYER_LIST[players[i].id] = box;
       scene.add(OTHER_PLAYER_LIST[players[i].id]);
 
       //if(players[i].id != selfID){
@@ -377,11 +380,11 @@ socket.on('initBlocks', function(blocks){
 //this function adds a new player to scene when other new player connects
 socket.on('newPlayer',function(newPlayer){
   console.log("new player connected with id: " + newPlayer.id);
-  var newcylinder = new THREE.Mesh( geometryCylinder, materialCylinder );
-  newcylinder.position.x = newPlayer.x;
-  newcylinder.position.y = newPlayer.y;
-  newcylinder.position.z = newPlayer.z;
-  OTHER_PLAYER_LIST[newPlayer.id] = newcylinder;
+  var box = new THREE.Mesh( geometryPlayerBox, materialBox );
+  box.position.x = newPlayer.x;
+  box.position.y = newPlayer.y;
+  box.position.z = newPlayer.z;
+  OTHER_PLAYER_LIST[newPlayer.id] = box;
   scene.add(OTHER_PLAYER_LIST[newPlayer.id]);//adding new player to scene
   var playerModel = new LoadPlayerModel(newPlayer.id + "", newPlayer.x,newPlayer.y - 1,newPlayer.z);
   console.log("Player model added in newPlayer for player " + newPlayer.id);
@@ -472,6 +475,16 @@ document.onkeydown  = function ( event ) {//called when keys are pressed
 	}
 };
 
+// renderer.addEventListener("mousedown", function (evt) {
+//     //socket.emit('keyPress', {inputId:'shoot', state:true});//shoots
+//     console.log("success");
+// }, false);
+var clickFunction = function() {
+  console.log("Bullet Fired");
+}
+window.onmousedown = clickFunction;
+
+
 //called when keys are released, sets bools to false and stops movement
 document.onkeyup = function ( event ) {
   switch ( event.code ) {
@@ -506,6 +519,12 @@ document.onkeyup = function ( event ) {
 var target = new THREE.Vector3();//used to save camera direction
 var oldX = 0;
 var oldY = 0;
+
+var vecRight = new THREE.Vector3();
+var vecForward = new THREE.Vector3();
+
+var vecX = new THREE.Vector3();
+var vecZ = new THREE.Vector3();
 
 var selfDirection;
 
@@ -545,20 +564,63 @@ socket.on('gameLoop', function(data){
   }
 
 
+//------------------------This section handles player movement------------------------------//
   direction.z = Number( moveForward ) - Number( moveBackward );//1 if move forward, -1 if move backward
 	direction.x = Number( moveRight ) - Number( moveLeft );//1 if move right, -1 if move left
   direction.normalize(); // this ensures consistent movements in all directions
 
-  controls.moveRight(playerSpeed * direction.x);
-  if(checkCollisionPlayerSideBlocks()){
-    controls.moveRight(-playerSpeed * direction.x);
+  //find right vector
+  vecRight.setFromMatrixColumn( camera.matrix, 0 );
+  vecX.x = vecRight.x;
+  vecZ.z = vecRight.z;
+
+  //right movement
+  camera.position.addScaledVector(vecX,playerSpeed * direction.x);
+  if (checkCollisionPlayerSideBlocks()){
+    camera.position.addScaledVector(vecX,-1 * playerSpeed * direction.x);
   }
-  controls.moveForward(playerSpeed * direction.z);
-  if(checkCollisionPlayerSideBlocks()){
-    controls.moveForward(-playerSpeed * direction.z);
+
+  camera.position.addScaledVector(vecZ,playerSpeed * direction.x);
+  if (checkCollisionPlayerSideBlocks()){
+    camera.position.addScaledVector(vecZ,-1 * playerSpeed * direction.x);
   }
 
 
+  //Find forward vector
+  vecForward.setFromMatrixColumn( camera.matrix, 0 );
+
+  vecForward.crossVectors( camera.up, vecForward);
+
+  vecX.x = vecForward.x;
+  vecZ.z = vecForward.z;
+
+
+  camera.position.addScaledVector(vecX,playerSpeed * direction.z);
+  if (checkCollisionPlayerSideBlocks()){
+    camera.position.addScaledVector(vecX,-1 * playerSpeed * direction.z);
+
+  }
+
+  camera.position.addScaledVector(vecZ,playerSpeed * direction.z);
+  if (checkCollisionPlayerSideBlocks()){
+    camera.position.addScaledVector(vecZ,-1 * playerSpeed * direction.z);
+  }
+
+
+
+  //old controls
+  //controls.moveRight(playerSpeed * direction.x);
+
+  // if(checkCollisionPlayerSideBlocks()){
+  //   controls.moveRight(-playerSpeed * direction.x);
+  // }
+  // controls.moveForward(playerSpeed * direction.z);
+  // if(checkCollisionPlayerSideBlocks()){
+  //   controls.moveForward(-playerSpeed * direction.z);
+  // }
+
+
+  //gravity
   velocityUp = velocityUp - gravSpeed;
   camera.position.y = camera.position.y + velocityUp;
   if(checkCollisionPlayerTopBlocks(camera.position.x,camera.position.y,camera.position.z)){
@@ -570,7 +632,7 @@ socket.on('gameLoop', function(data){
     camera.position.y = 1;
     canJump = true;
   }
-
+  //----------------------End player movement------------------------//
 
   if(selfPlayerModel){
     selfPlayerModel._UpdatePosition(camera.position.x, camera.position.y,  camera.position.z);
@@ -645,15 +707,11 @@ var checkCollisionPlayerSideBlocks = function(){
     var bottomBound = topBound - 1;
 
     if ((playerY <= topBound && playerY > bottomBound) || (playerY -2  <= topBound && playerY - 2 > bottomBound) || (BLOCK_LIST[i].position.y > playerY -2 && BLOCK_LIST[i].position.y < playerY)) {
-      var circleDistX = Math.abs(playerX - BLOCK_LIST[i].position.x);
-      var circleDistZ = Math.abs(playerZ - BLOCK_LIST[i].position.z);
-
-      if (circleDistX < 1 && circleDistZ < 1){
-        return true;
-      }
-      var cornerDist = Math.pow((circleDistX - 0.5),2) + Math.pow((circleDistZ - 0.5),2);
-
-      if (Math.sqrt(cornerDist) <= 0.5){
+      //if (playerY-2 <= topBound && playerY-2 > bottomBound){
+      if (playerX - 0.25 < BLOCK_LIST[i].position.x + 0.5 &&
+       playerX + 0.25 > BLOCK_LIST[i].position.x - 0.5 &&
+       playerZ -0.25 < BLOCK_LIST[i].position.z + 0.5 &&
+       playerZ + 0.25 > BLOCK_LIST[i].position.z - 0.5) {
         return true;
       }
     }
@@ -676,28 +734,13 @@ var checkCollisionPlayerTopBlocks = function(playerX,playerY,playerZ) {
     }
 
     if (playerY-2 <= topBound && playerY-2 > bottomBound){
-
-    var circleDistX = Math.abs(playerX - BLOCK_LIST[i].position.x);
-    var circleDistZ = Math.abs(playerZ - BLOCK_LIST[i].position.z);
-
-    if (circleDistX < 1 && circleDistZ < 1){
-      if (circleDistX <= 0.5 || circleDistZ){
-        canJump = true;
-        return true;
-      }
-
-      var cornerDist = Math.pow((circleDistX - 0.5),2) + Math.pow((circleDistZ - 0.5),2);
-
-      if (Math.sqrt(cornerDist) <= 0.5){
-        canJump = true;
-        return true;
-      }
-    }
-
-      // if ((playerY-2) <= topBound && (playerY-2) > bottomBound && playerZ < forwardBound && playerZ > backBound && playerX < rightBound && playerX > leftBound){
-      //   canJump = true;
-      //   return true;//bottom of player hit block
-      // }
+      if (playerX - 0.25 < BLOCK_LIST[i].position.x + 0.5 &&
+        playerX + 0.25 > BLOCK_LIST[i].position.x - 0.5 &&
+        playerZ -0.25 < BLOCK_LIST[i].position.z + 0.5 &&
+        playerZ + 0.25 > BLOCK_LIST[i].position.z - 0.5) {
+          canJump = true;
+          return true;//bottom of player hit top of block
+        }
     }
   }
   return false;
