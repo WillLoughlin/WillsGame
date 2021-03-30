@@ -27,13 +27,8 @@ var BLOCK_LIST = {};
 var playerSpeed = 0.05;
 var playerHeight = 2;
 
-var playerModelOffsetX = 0;
-var playerModelOffsetY = 0;
-var playerModelOffsetZ = 0;
-
-//var playerModelOffsetForward = -0.3;
-var playerModelOffsetForward = 0;
-var playerModelOffsetRight = 0;
+var velocityUp = 0;
+var gravSpeed = 0.01;
 
 //These variables used for movement
 let moveForward = false;
@@ -62,7 +57,7 @@ var geometry = new THREE.BoxGeometry(1,1,1);//width,depth,HEIGHT
 
 var socket = io();
 var selfID = 0;
-var indexSelf = 0;
+//var indexSelf = 0;
 
 
 //Getting player's self ID
@@ -141,69 +136,22 @@ const texture = loader.load([
 scene.background = texture;
 
 
-//change emmision to change color
-//GLTF Model loading
-/*
-function LoadGLTFModel(){
-  var loader = new GLTFLoader();
-  loader.load('./client/models/gun4.glb', (gltf) => {
-    gltf.scene.traverse(c => {
-      c.castShadow = true;
-    });
-    scene.add(gltf.scene);
-  });
-}
-
-LoadGLTFModel();
-*/
-
-const clock = new THREE.Clock();
-
-class BasicCharacterControls {
+class MovementControls {
   constructor(params) {
-    this._Init(params);
-  }
-
-  _Init(params) {
     this._params = params;
-    this._move = {
-      forward: false,
-      backward: false,
-      left: false,
-      right: false,
-    };
-    this._decceleration = new THREE.Vector3(-0.0005, -0.0001, -5.0);
-    this._acceleration = new THREE.Vector3(1, 0.25, 50.0);
-    this._velocity = new THREE.Vector3(0, 0, 0);
-
-    //document.addEventListener('keydown', (e) => this._onKeyDown(e), false);
-    //document.addEventListener('keyup', (e) => this._onKeyUp(e), false);
   }
 
   updatePosition(x,y,z) {
-    this._params.target.position.x = x + playerModelOffsetX;
-    this._params.target.position.y = y + playerModelOffsetY;
-    this._params.target.position.z = z + playerModelOffsetZ;
+    this._params.target.position.x = x;
+    this._params.target.position.y = y;
+    this._params.target.position.z = z;
   }
 
   updateDirection(x,y,z) {
-    //var dir = new THREE.Vector3(0,x,0);
-    //console.log("X: " + x);
-    //this._params.target.rotation.x = y;
-    this._params.target.rotation.y = y;
-
-    var theta = -1 * y + Math.PI / 2;
-    var newXoffset = playerModelOffsetForward * Math.cos(theta);
-    this._params.target.position.x = this._params.target.position.x + newXoffset;
-
-    var newZoffset = playerModelOffsetForward * Math.sin(theta);
-    this._params.target.position.z = this._params.target.position.z + newZoffset;
-
-    //this._params.target.rotation.z = z;
-    //.rotation.set(0,x,0);
+    this._params.target.rotation.y = y;//only updates the y direction of other players
   }
 
-  updateDirectionSelf(cameraX,cameraZ){
+  updateDirectionSelf(cameraX,cameraZ){//self model rotates exactly with camera
     this._params.target.position.copy(camera.position);
     this._params.target.rotation.copy(camera.rotation);
 
@@ -243,10 +191,9 @@ class LoadGun {
           target: gltf.scene,
           camera: camera,
         }
-        this._controls = new BasicCharacterControls(params);//creating controls class that handles movement of object
+        this._controls = new MovementControls(params);//creating controls class that handles movement of object
         gltf.scene.name = this.name;
         scene.add(gltf.scene);
-        console.log("test gun added");
       });
 
   }
@@ -271,11 +218,8 @@ class LoadGun {
   }
 }
 
-//console.log("beginning gun add");
-//var testGun = new LoadGun("test name", 2,2,2);
 
-
-class LoadModelDemo {
+class LoadPlayerModel {
   constructor(name, x,y,z) {
     this.startX = x;
     this.startY = y;
@@ -296,7 +240,7 @@ class LoadModelDemo {
   }
 
   _LoadAnimatedModel() {
-    const loader = new FBXLoader();
+    const loader = new FBXLoader();//change emmision in blender to change color of gun
     loader.load('./client/models/ybot.fbx', (fbx) => {
       fbx.scale.setScalar(0.013);
       fbx.traverse(c => {
@@ -307,7 +251,7 @@ class LoadModelDemo {
         target: fbx,
         camera: camera,
       }
-      this._controls = new BasicCharacterControls(params);//creating controls class that handles movement of object
+      this._controls = new MovementControls(params);//creating controls class that handles movement of object
       fbx.name = this.name;
 
       const anim = new FBXLoader();
@@ -368,17 +312,12 @@ class LoadModelDemo {
   }
 }
 
-//var loadedModel = new LoadModelDemo(0,0,0);
-
 var selfPlayerModel;
 var selfGun;
 
 socket.on('initPlayers', function(players){
   //console.log("creating players");
   for(var i = 0; i < players.length; i++){
-      if(players[i].id == selfID){
-        indexSelf = i;//finding player index
-      }
       var cylinder = new THREE.Mesh( geometryCylinder, materialCylinder );
       //console.log("Player position: " + players[i].x + "," +players[i].z);
       cylinder.position.x = players[i].x;
@@ -390,7 +329,7 @@ socket.on('initPlayers', function(players){
       //if(players[i].id != selfID){
         //console.log("cylinder created at "+OTHER_PLAYER_LIST[other_player_count].position.x + ","+OTHER_PLAYER_LIST[other_player_count].position.z)
         //scene.add(OTHER_PLAYER_LIST[players[i].id]);
-        var playerModel = new LoadModelDemo(players[i].id + "", players[i].x,players[i].y - 1,players[i].z);
+        var playerModel = new LoadPlayerModel(players[i].id + "", players[i].x,players[i].y - 1,players[i].z);
         PLAYER_MODEL_LIST[players[i].id] = playerModel;
         var gunModel = new LoadGun(players[i].id + "gun", players[i].x,players[i].y - 1,players[i].z);
         GUN_LIST[players[i].id] = gunModel;
@@ -407,6 +346,7 @@ socket.on('initPlayers', function(players){
 });
 //-------------------End drawing other players---------------------//
 
+var numBlocks = 0;
 //------------------Creating Map With Blocks----------------------//
 socket.on('initBlocks', function(blocks){
   for (var i = 0; i < blocks.length; i++){
@@ -426,7 +366,10 @@ socket.on('initBlocks', function(blocks){
     block.position.x = blocks[i].x;
     block.position.y = blocks[i].y;
     block.position.z = blocks[i].z;
-    scene.add(block);
+    BLOCK_LIST[numBlocks] = block;
+    scene.add(BLOCK_LIST[numBlocks]);
+    //console.log("Block added, block length: " + numBlocks);
+    numBlocks = numBlocks + 1;
   }
 });
 
@@ -439,7 +382,7 @@ socket.on('newPlayer',function(newPlayer){
   newcylinder.position.z = newPlayer.z;
   OTHER_PLAYER_LIST[newPlayer.id] = newcylinder;
   scene.add(OTHER_PLAYER_LIST[newPlayer.id]);//adding new player to scene
-  var playerModel = new LoadModelDemo(newPlayer.id + "", newPlayer.x,newPlayer.y - 1,newPlayer.z);
+  var playerModel = new LoadPlayerModel(newPlayer.id + "", newPlayer.x,newPlayer.y - 1,newPlayer.z);
   console.log("Player model added in newPlayer for player " + newPlayer.id);
   PLAYER_MODEL_LIST[newPlayer.id] = playerModel;
   var gunModel = new LoadGun(newPlayer.id + "gun", newPlayer.x,newPlayer.y - 1,newPlayer.z);
@@ -522,7 +465,7 @@ document.onkeydown  = function ( event ) {//called when keys are pressed
 		break;
 
 	case 'Space':
-		if ( canJump === true ) velocity.y += 350;
+		if ( canJump === true ) velocityUp = 0.5;
 		canJump = false;
 		break;
 	}
@@ -582,7 +525,7 @@ socket.on('gameLoop', function(data){
       OTHER_PLAYER_LIST[data[i].id].position.z = data[i].z;
     }
     if(PLAYER_MODEL_LIST[data[i].id]){
-      PLAYER_MODEL_LIST[data[i].id]._UpdatePosition(data[i].x + playerModelOffsetX, data[i].y + playerModelOffsetY, data[i].z + playerModelOffsetZ);
+      PLAYER_MODEL_LIST[data[i].id]._UpdatePosition(data[i].x, data[i].y, data[i].z);
       PLAYER_MODEL_LIST[data[i].id]._UpdateDirection(data[i].cameraX,data[i].cameraY,data[i].cameraZ);
       if(data[i].id == selfID){
         selfDirection = data[i].cameraY;
@@ -590,7 +533,7 @@ socket.on('gameLoop', function(data){
       }
     }
     if(GUN_LIST[data[i].id]){
-      GUN_LIST[data[i].id]._UpdatePosition(data[i].x + playerModelOffsetX, data[i].y + playerModelOffsetY, data[i].z + playerModelOffsetZ);
+      GUN_LIST[data[i].id]._UpdatePosition(data[i].x, data[i].y, data[i].z);
       GUN_LIST[data[i].id]._UpdateDirection(data[i].cameraX,data[i].cameraY,data[i].cameraZ);
       if(data[i].id == selfID){
         selfDirection = data[i].cameraY;
@@ -606,18 +549,41 @@ socket.on('gameLoop', function(data){
   direction.normalize(); // this ensures consistent movements in all directions
 
   controls.moveRight(playerSpeed * direction.x);
+  if(checkCollisionPlayerSideBlocks()){
+    controls.moveRight(-playerSpeed * direction.x);
+  }
   controls.moveForward(playerSpeed * direction.z);
+  if(checkCollisionPlayerSideBlocks()){
+    controls.moveForward(-playerSpeed * direction.z);
+  }
+
+
+  velocityUp = velocityUp - gravSpeed;
+  camera.position.y = camera.position.y + velocityUp;
+  if(checkCollisionPlayerTopBlocks(camera.position.x,camera.position.y,camera.position.z)){
+    camera.position.y = camera.position.y - velocityUp;
+    velocityUp = 0;
+  }
+
+  if (camera.position.y < -3) {
+    camera.position.y = -3;
+    canJump = true;
+  }
+
+
+  // if (!checkCollisionPlayerTopBlocks()){
+  //   camera.position.y = camera.position.y - gravSpeed;
+  // }
 
   //console.log("direction z: " + direction.z + " direction x: " + direction.x)
   //console.log(" ")
 
   if(selfPlayerModel){
-    selfPlayerModel._UpdatePosition(camera.position.x + playerModelOffsetX, camera.position.y + playerModelOffsetY,  camera.position.z + playerModelOffsetZ);
-    //selfPlayerModel._UpdateDirection(0,selfDirection,0);
+    selfPlayerModel._UpdatePosition(camera.position.x, camera.position.y,  camera.position.z);
   }
 
   if(selfGun){
-    selfGun._UpdatePosition(camera.position.x + playerModelOffsetX, camera.position.y + playerModelOffsetY,  camera.position.z + playerModelOffsetZ);
+    selfGun._UpdatePosition(camera.position.x, camera.position.y,  camera.position.z);
   }
 
   sendPlayerInfo();
@@ -669,11 +635,42 @@ var sendPlayerInfo = function(){
 
 //game logic
 var update = function(){
-  OTHER_PLAYER_LIST[selfID].position.x = camera.position.x + playerModelOffsetX;
-  OTHER_PLAYER_LIST[selfID].position.y = camera.position.y + playerModelOffsetY;
-  OTHER_PLAYER_LIST[selfID].position.z = camera.position.z + playerModelOffsetZ;
+  OTHER_PLAYER_LIST[selfID].position.x = camera.position.x;
+  OTHER_PLAYER_LIST[selfID].position.y = camera.position.y - 1;
+  OTHER_PLAYER_LIST[selfID].position.z = camera.position.z;
 
 };
+
+var checkCollisionPlayerSideBlocks = function(){
+  return false;
+}
+
+var checkCollisionPlayerTopBlocks = function(playerX,playerY,playerZ) {
+
+  for (var i = 0; i < numBlocks; i++){
+    var topBound = BLOCK_LIST[i].position.y + 0.5;
+    var bottomBound = topBound - 1;
+    var rightBound = BLOCK_LIST[i].position.x + 0.5;
+    var leftBound = rightBound - 1;
+    var forwardBound = BLOCK_LIST[i].position.z + 0.5;
+    var backBound = forwardBound - 1;
+
+    if (playerY <= topBound && playerY > bottomBound && playerZ < forwardBound && playerZ > backBound && playerX < rightBound && playerX > leftBound){
+      return true;//top of player hit block
+    }
+    if ((playerY-2) <= topBound && (playerY-2) > bottomBound && playerZ < forwardBound && playerZ > backBound && playerX < rightBound && playerX > leftBound){
+      canJump = true;
+      return true;//bottom of player hit block
+    }
+  }
+  return false;
+}
+
+var distanceTwoPoints = function(x1,y1,z1,x2,y2,z2){
+  var sum = Math.pow((x1-x2),2) + Math.pow((y1-y2),2) + Math.pow((z1-z2),2);
+  var dist = Math.sqrt(sum);
+  return dist;
+}
 
 //draw scene
 var render = function() {

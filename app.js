@@ -129,8 +129,8 @@ Object.defineProperty(Block.prototype, 'constructor', {
 //BLOCK_LIST[2] = block2;
 
 var counter = 1;
-for (var i = -2; i < 3; i++){
-  for(var j = -2; j < 3; j++){
+for (var i = -4; i < 5; i++){
+  for(var j = -4; j < 5; j++){
     var block = new Block(counter,i,0,j,"Block", 1, 1, "client/img/1.jpg", "client/img/hardwood_floor.jpg", "client/img/1.jpg");
     BLOCK_LIST[counter] = block;
     counter++;
