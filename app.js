@@ -34,6 +34,8 @@ var BLOCK_LIST = {};
 var playerSpeed = 0.05;
 var playerHeight = 2;
 
+
+
 // var blockWidth = 100;
 // var blockHeight = 100;
 // var numBlocks = 0;
@@ -131,14 +133,30 @@ Object.defineProperty(Block.prototype, 'constructor', {
 var counter = 1;
 for (var i = -4; i < 5; i++){
   for(var j = -4; j < 5; j++){
-    var block = new Block(counter,i,0,j,"Block", 1, 1, "client/img/1.jpg", "client/img/hardwood_floor.jpg", "client/img/1.jpg");
+    var block = new Block(counter,i,0,j,"Block", 1, 1, "client/img/wood2.jpeg", "client/img/hardwood_floor.jpg", "client/img/wood2.jpeg");
     BLOCK_LIST[counter] = block;
     counter++;
   }
 }
 
-BLOCK_LIST[counter] = new Block(counter, 0, 1, 0, "Block",1,1,"client/img/1.jpg", "client/img/hardwood_floor.jpg", "client/img/1.jpg");
+for (var i = 5; i < 7; i++){
+  for(var j = 3; j < 15; j++){
+    var block = new Block(counter,i,0,j,"Block", 1, 1, "client/img/wood2.jpeg", "client/img/hardwood_floor.jpg", "client/img/wood2.jpeg");
+    BLOCK_LIST[counter] = block;
+    counter++;
+  }
+}
+
+BLOCK_LIST[counter] = new Block(counter, 0, 1, 0, "Block",1,1,"client/img/bricks1.jpg", "client/img/4.jpg", "client/img/bricks1.jpg");
 counter++;
+BLOCK_LIST[counter] = new Block(counter, 1, 2, 0, "Block",1,1,"client/img/bricks1.jpg", "client/img/4.jpg", "client/img/bricks1.jpg");
+counter++;
+BLOCK_LIST[counter] = new Block(counter, 2, 3, 0, "Block",1,1,"client/img/bricks1.jpg", "client/img/4.jpg", "client/img/bricks1.jpg");
+counter++;
+BLOCK_LIST[counter] = new Block(counter, 3, 4, 0, "Block",1,1,"client/img/bricks1.jpg", "client/img/4.jpg", "client/img/bricks1.jpg");
+counter++;
+BLOCK_LIST[counter] = new Block(counter, 4, 5, 0, "Block",1,1,"client/img/bricks1.jpg", "client/img/4.jpg", "client/img/bricks1.jpg");
+
 
 //Socket.io used for multiplayer functionality
 var io = require('socket.io')(serv,{});
@@ -268,16 +286,18 @@ setInterval(function(){//game loop
         cameraX:player.cameraX,
         cameraY:player.cameraY,
         cameraZ:player.cameraZ,
-        name:player.name,
-        height:player.height,
-        width:player.width,
-        type:player.type,
-        pressingRight:player.pressingRight,
-        pressingLeft:player.pressingLeft,
-        pressingUp:player.pressingUp,
-        pressingDown:player.pressingDown
+        name:player.name
       });
   }
+
+  //Old included in pack:
+  // height:player.height,
+  // width:player.width,
+  // type:player.type,
+  // pressingRight:player.pressingRight,
+  // pressingLeft:player.pressingLeft,
+  // pressingUp:player.pressingUp,
+  // pressingDown:player.pressingDown
 
   // for (var i in BLOCK_LIST){
   //   var block = BLOCK_LIST[i];
