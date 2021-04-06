@@ -23,6 +23,8 @@ var PLAYER_MODEL_LIST = {};
 var GUN_LIST = {};
 var BLOCK_LIST = {};
 
+var playerBoundingBox = false;
+
 //These get updated from the Server on connection
 var playerSpeed = 0.05;
 var playerHeight = 2;
@@ -329,7 +331,9 @@ socket.on('initPlayers', function(players){
       box.position.z = players[i].z;
 
       OTHER_PLAYER_LIST[players[i].id] = box;
-      scene.add(OTHER_PLAYER_LIST[players[i].id]);
+      if(playerBoundingBox){
+        scene.add(OTHER_PLAYER_LIST[players[i].id]);
+      }
 
       //if(players[i].id != selfID){
         //console.log("cylinder created at "+OTHER_PLAYER_LIST[other_player_count].position.x + ","+OTHER_PLAYER_LIST[other_player_count].position.z)
@@ -350,6 +354,59 @@ socket.on('initPlayers', function(players){
   }
 });
 //-------------------End drawing other players---------------------//
+
+//-----------------------Add Reticle-----------------------//
+/*//how to add a line to the scene
+const reticleMaterial = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+const points = [];
+points.push( new THREE.Vector3( - 10, 0, 0 ) );
+points.push( new THREE.Vector3( 0, 10, 0 ) );
+points.push( new THREE.Vector3( 10, 0, 0 ) );
+
+const linegeometry = new THREE.BufferGeometry().setFromPoints( points );
+const line = new THREE.Line( linegeometry, reticleMaterial );
+scene.add(line);
+*/
+
+//hud:
+//https://stackoverflow.com/questions/12667507/drawing-ui-elements-directly-to-the-webgl-area-with-three-js
+
+//Create 2d canvas to draw hud
+var hudCanvas = document.createElement('canvas');
+
+//set dimensions to screen
+hudCanvas.width = WIDTH;
+hudCanvas.height = HEIGHT;
+
+//get 2d context and draw test
+var hudBitmap = hudCanvas.getContext('2d');
+hudBitmap.font = "Normal 40px Arial";
+hudBitmap.textAlign = 'center';
+hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
+hudBitmap.fillText('Initializing...', WIDTH / 2, HEIGHT / 2);
+
+//create new camera in orthographic scene
+var cameraHUD = new THREE.OrthographicCamera(-WIDTH/2, WIDTH/2, HEIGHT/2, -HEIGHT/2, 0, 30 );
+
+//create new scene for hud
+var sceneHUD = new THREE.Scene();
+
+//create texture for hud
+var hudTexture = new THREE.Texture(hudCanvas)
+hudTexture.needsUpdate = true;
+
+//create material for hud
+var hudmaterial = new THREE.MeshBasicMaterial( {map: hudTexture} );
+hudmaterial.transparent = true;
+
+//create plane in orthographic scene
+var planeGeometry = new THREE.PlaneGeometry( WIDTH, HEIGHT );
+var plane = new THREE.Mesh( planeGeometry, hudmaterial );
+sceneHUD.add( plane );
+
+
+//----------------------End Add Reticle-------------------//
+
 
 var numBlocks = 0;
 //------------------Creating Map With Blocks----------------------//
@@ -386,7 +443,9 @@ socket.on('newPlayer',function(newPlayer){
   box.position.y = newPlayer.y;
   box.position.z = newPlayer.z;
   OTHER_PLAYER_LIST[newPlayer.id] = box;
-  scene.add(OTHER_PLAYER_LIST[newPlayer.id]);//adding new player to scene
+  if(playerBoundingBox){
+    scene.add(OTHER_PLAYER_LIST[newPlayer.id]);//adding new player to scene
+  }
   var playerModel = new LoadPlayerModel(newPlayer.id + "", newPlayer.x,newPlayer.y - 1,newPlayer.z);
   console.log("Player model added in newPlayer for player " + newPlayer.id);
   PLAYER_MODEL_LIST[newPlayer.id] = playerModel;
@@ -395,7 +454,9 @@ socket.on('newPlayer',function(newPlayer){
 });
 
 socket.on('disconnectedPlayer',function(oldPlayer){
-  scene.remove(OTHER_PLAYER_LIST[oldPlayer.id]);
+  if(playerBoundingBox){
+    scene.remove(OTHER_PLAYER_LIST[oldPlayer.id]);
+  }
   //console.log("Attempting to remove player with id " + oldPlayer.id);
   var toRemove = scene.getObjectByName(oldPlayer.id + "");
   var toRemoveGun = scene.getObjectByName(oldPlayer.id + "gun");
@@ -486,6 +547,7 @@ document.onkeydown  = function ( event ) {//called when keys are pressed
 // }, false);
 var clickFunction = function() {
   console.log("Bullet Fired");
+  socket.emit('Shoot')
 }
 window.onmousedown = clickFunction;
 
@@ -538,7 +600,19 @@ var vecZ = new THREE.Vector3();
 
 var selfDirection;
 
+//var timerCounter = 0;
+//var amountTime = 0.0;
+//var clock = new THREE.Clock();
+// var clock2 = new THREE.Clock();
+// clock2.start();
+
+//var cycleCounter = 0;
+
+//clock.start();
+
 socket.on('gameLoop', function(data){
+
+
   //console.log("test");
   //updating position of other players in game
   for(var i = 0; i < data.length; i++){
@@ -578,6 +652,9 @@ socket.on('gameLoop', function(data){
   } else {
     playerSpeed = 0.05;
   }
+
+
+  //clock.start();
 //------------------------This section handles player movement------------------------------//
   direction.z = Number( moveForward ) - Number( moveBackward );//1 if move forward, -1 if move backward
 	direction.x = Number( moveRight ) - Number( moveLeft );//1 if move right, -1 if move left
@@ -588,6 +665,9 @@ socket.on('gameLoop', function(data){
   vecX.x = vecRight.x;
   vecZ.z = vecRight.z;
 
+
+  //timerCounter = timerCounter + 1;
+
   //right movement
   camera.position.addScaledVector(vecX,playerSpeed * direction.x);
   if (checkCollisionPlayerSideBlocks()){
@@ -597,6 +677,7 @@ socket.on('gameLoop', function(data){
   camera.position.addScaledVector(vecZ,playerSpeed * direction.x);
   if (checkCollisionPlayerSideBlocks()){
     camera.position.addScaledVector(vecZ,-1 * playerSpeed * direction.x);
+
   }
 
 
@@ -612,7 +693,6 @@ socket.on('gameLoop', function(data){
   camera.position.addScaledVector(vecX,playerSpeed * direction.z);
   if (checkCollisionPlayerSideBlocks()){
     camera.position.addScaledVector(vecX,-1 * playerSpeed * direction.z);
-
   }
 
   camera.position.addScaledVector(vecZ,playerSpeed * direction.z);
@@ -620,7 +700,24 @@ socket.on('gameLoop', function(data){
     camera.position.addScaledVector(vecZ,-1 * playerSpeed * direction.z);
   }
 
+  //console.log("Time: " + clock.getDelta());
+  //amountTime = amountTime + clock.getDelta();
+  // clock.stop();
+  //
+  // if (timerCounter == 64){
+  //   timerCounter = 0;
+  //   console.log("Time for 64 cycles: " + amountTime);
+  //   amountTime = 0.0;
+  // }
 
+/*//code to count how many cycles per second (64)
+  if (clock2.getElapsedTime() > 5 && clock2.getElapsedTime() < 7){
+      cycleCounter = cycleCounter + 1;
+  }
+  if (clock2.getElapsedTime() > 7 && clock2.getElapsedTime() < 8){
+    console.log("Cycles in 2 seconds: " + cycleCounter);
+  }
+*/
 
   //old controls
   //controls.moveRight(playerSpeed * direction.x);
@@ -770,4 +867,15 @@ var distanceTwoPoints = function(x1,y1,z1,x2,y2,z2){
 //draw scene
 var render = function() {
   renderer.render(scene,camera);
+  renderer.autoClear = false;
+
+  //render hud
+  // hudBitmap.clearRect(0, 0, WIDTH, HEIGHT);
+  // hudBitmap.fillText("test",WIDTH/2,HEIGHT/2);
+  hudBitmap.fillText('test', WIDTH / 2, HEIGHT / 2);
+
+  hudTexture.needsUpdate = true;
+
+  renderer.render(sceneHUD, cameraHUD);
+
 };
