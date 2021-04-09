@@ -301,6 +301,7 @@ var bulletThresholdDistance = 50;
 
         for (var s in SOCKET_LIST){
           SOCKET_LIST[s].emit('bulletCollision',newData);
+          //console.log("Bullet removed for collision");
           removeBulletFromServer(data[i].name);
         }
         //socket.emit('bulletCollision',newData);
@@ -333,11 +334,11 @@ var playerDist;
 var checkCollisionBulletPlayers = function (x,y,z,name,selfID){
   var lowDist = 100;
   for (var i in PLAYER_LIST){
+    playerDist = distanceTwoPoints(x,y,z,PLAYER_LIST[i].x,PLAYER_LIST[i].y,PLAYER_LIST[i].z);
+    if (playerDist < lowDist){
+      lowDist = playerDist;
+    }
     if (PLAYER_LIST[i].id != selfID){
-      playerDist = distanceTwoPoints(x,y,z,PLAYER_LIST[i].x,PLAYER_LIST[i].y,PLAYER_LIST[i].z);
-      if (playerDist < lowDist){
-        lowDist = playerDist;
-      }
       if (playerDist < 0.5){//add collision detection points here, as of now it is just 0.5 distance from camera
         console.log("Collision between bullet " + name + " and player " + PLAYER_LIST[i].id);
         return PLAYER_LIST[i].id;

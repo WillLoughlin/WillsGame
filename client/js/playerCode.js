@@ -641,7 +641,7 @@ socket.on('newBulletPlayer',function(data){
 socket.on('removeBullet',function(data){
   var bulletID = data[0].id;
   var bulletObject = scene.getObjectByName(bulletID);
-  //console.log("attempting to remove bullet " + data[0].id);
+  console.log("attempting to remove bullet " + data[0].id);
   scene.remove(bulletObject);
   delete BULLET_CAM_LIST[bulletID];
   delete BULLET_MODEL_LIST[bulletID];
@@ -1024,18 +1024,18 @@ var render = function() {
   renderer.render(scene,camera);
   renderer.autoClear = false;
 
-  hudTexture.needsUpdate = true;
+  //hudTexture.needsUpdate = true;
   //render hud
   //hudBitmap.clearRect(0, 0, WIDTH, HEIGHT);
-  hudBitmap.font = "Normal 40px Arial";
-  hudBitmap.textAlign = 'center';
-  hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
-  hudBitmap.fillText('Test', WIDTH / 2, HEIGHT / 2);
+  //hudBitmap.font = "Normal 40px Arial";
+  //hudBitmap.textAlign = 'center';
+  //hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
+  //hudBitmap.fillText('Test', WIDTH / 2, HEIGHT / 2);
 
   // hudBitmap.fillText("test",WIDTH/2,HEIGHT/2);
   //hudBitmap.fillText('test', WIDTH / 2, HEIGHT / 2);
 
 
-  renderer.render(sceneHUD, cameraHUD);
+  //renderer.render(sceneHUD, cameraHUD);
 
 };
