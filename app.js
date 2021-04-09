@@ -29,6 +29,7 @@ These lists used to store players and sockets
 var SOCKET_LIST = {};//this list used to access socket connections
 var PLAYER_LIST = {};//this list used to store each player object
 var BLOCK_LIST = {};
+var BULLET_LIST = {};
 
 //this info sent to player on connection
 var playerSpeed = 0.05;
@@ -117,7 +118,22 @@ function Block(id, x, y, z, type, width, height, imgSides, imgTop, imgBottom){
 //This code allows Block to use member functions of Thing object
 Block.prototype = Object.create(Thing.prototype);
 Object.defineProperty(Block.prototype, 'constructor', {
-  value: Player,
+  value: Block,
+  enumerable: false,
+  writable: true
+});
+
+
+//bullet object
+function Bullet(idSelf,idOwner, x,y,z,type){
+  Thing.call(this,idSelf,x,y,z,type);
+  this.idSelf = idSelf;
+  this.idOwner = idOwner;
+}
+
+Bullet.prototype = Object.create(Thing.prototype);
+Object.defineProperty(Bullet.prototype, 'constructor', {
+  value: Bullet,
   enumerable: false,
   writable: true
 });
@@ -247,6 +263,51 @@ io.sockets.on('connection', function(socket){//called when player connects with 
     player.z = data[0].playerZ;
   });
 
+  socket.on('newBullet',function(data){
+    var bullet = new Bullet(data[0].id,player.id,data[0].x,data[0].y,data[0].z,'Bullet');
+    BULLET_LIST[bullet.id] = bullet;
+    for(var i in SOCKET_LIST){
+      if(PLAYER_LIST[i].id != player.id){
+        SOCKET_LIST[i].emit('newBulletPlayer',data);
+      }
+    }
+  });
+
+var bulletThresholdDistance = 50;
+
+  socket.on('bulletInfo',function(data){
+    //collision detection happens here
+
+    var newData = [];
+    for (var i in data){
+      //var id = parseInt(data[i].name);
+      if(BULLET_LIST[data[i].id]){
+      BULLET_LIST[data[i].id].x = data[i].x;
+      BULLET_LIST[data[i].id].y = data[i].y;
+      BULLET_LIST[data[i].id].z = data[i].z;
+    }
+
+      var idCollision = checkCollisionBulletPlayers(data[i].x,data[i].y,data[i].z,data[i].id,player.id);
+      if (idCollision != -1){//collision detected with data[i] bullet and player with idCollision
+        console.log("collision detected, Bullet: " + data[i].name + " Player: " + idCollision);
+        newData.push({
+          bulletName:data[i].name,
+          bulletX:data[i].x,
+          bulletY:data[i].y,
+          bulletZ:data[i].z,
+          playerID:idCollision,
+          killerID:player.id
+        });
+
+        for (var s in SOCKET_LIST){
+          SOCKET_LIST[s].emit('bulletCollision',newData);
+          removeBulletFromServer(data[i].name);
+        }
+        //socket.emit('bulletCollision',newData);
+      }
+    }
+  });
+
   /*
     This function recieves keypress information from the user
   */
@@ -267,6 +328,50 @@ io.sockets.on('connection', function(socket){//called when player connects with 
   });
 });
 
+var playerDist;
+
+var checkCollisionBulletPlayers = function (x,y,z,name,selfID){
+  var lowDist = 100;
+  for (var i in PLAYER_LIST){
+    if (PLAYER_LIST[i].id != selfID){
+      playerDist = distanceTwoPoints(x,y,z,PLAYER_LIST[i].x,PLAYER_LIST[i].y,PLAYER_LIST[i].z);
+      if (playerDist < lowDist){
+        lowDist = playerDist;
+      }
+      if (playerDist < 0.5){//add collision detection points here, as of now it is just 0.5 distance from camera
+        console.log("Collision between bullet " + name + " and player " + PLAYER_LIST[i].id);
+        return PLAYER_LIST[i].id;
+      }
+    }
+  }
+  if (lowDist > 50){
+    removeBulletFromServer(name);
+    //console.log("Bullet " + name + " removed for distance");
+  }
+  return -1;
+}
+
+var distanceTwoPoints = function(x1,y1,z1,x2,y2,z2){
+  var sum = Math.pow((x1-x2),2) + Math.pow((y1-y2),2) + Math.pow((z1-z2),2);
+  var dist = Math.sqrt(sum);
+  return dist;
+}
+
+var removeBulletFromServer = function(name){
+  var bulletID = [];
+  bulletID.push({id:name});
+  for (var s in SOCKET_LIST){
+    SOCKET_LIST[s].emit('removeBullet',bulletID);
+  }
+  if (BULLET_LIST[name]){
+    //console.log("Bullet " + name + " found and removed.");
+  } else {
+    //console.log("Cannot find bullet" + name);
+  }
+  delete BULLET_LIST[name];
+}
+
+
 
 /*
   This is the gameloop function
@@ -286,8 +391,20 @@ setInterval(function(){//game loop
         cameraX:player.cameraX,
         cameraY:player.cameraY,
         cameraZ:player.cameraZ,
-        name:player.name
+        name:player.name,
+        type:'Player'
       });
+  }
+
+  for (var i in BULLET_LIST){
+    var bullet = BULLET_LIST[i];
+    pack.push({
+      x:bullet.x,
+      y:bullet.y,
+      z:bullet.z,
+      id:bullet.id,
+      type:'Bullet'
+    })
   }
 
   //Old included in pack:

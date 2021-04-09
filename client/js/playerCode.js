@@ -23,6 +23,11 @@ var PLAYER_MODEL_LIST = {};
 var GUN_LIST = {};
 var BLOCK_LIST = {};
 
+var BULLET_CAM_LIST = {};
+var BULLET_MODEL_LIST = {};
+
+var ENEMY_BULLET_LIST = {};
+
 var playerBoundingBox = false;
 
 //These get updated from the Server on connection
@@ -32,6 +37,8 @@ var playerHeight = 2;
 var velocityUp = 0;
 var gravSpeed = 0.01;
 var jumpSpeed = 0.2
+
+var bulletSpeed = 0.3;
 
 //These variables used for movement
 let moveForward = false;
@@ -371,6 +378,12 @@ scene.add(line);
 //hud:
 //https://stackoverflow.com/questions/12667507/drawing-ui-elements-directly-to-the-webgl-area-with-three-js
 
+//Crosshair variables
+var widthBar = 2;
+var lengthBar = 8;
+var distBar = 1;
+
+
 //Create 2d canvas to draw hud
 var hudCanvas = document.createElement('canvas');
 
@@ -380,13 +393,46 @@ hudCanvas.height = HEIGHT;
 
 //get 2d context and draw test
 var hudBitmap = hudCanvas.getContext('2d');
-hudBitmap.font = "Normal 40px Arial";
-hudBitmap.textAlign = 'center';
+//hudBitmap.font = "Normal 40px Arial";
+//hudBitmap.textAlign = 'center';
 hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
-hudBitmap.fillText('Initializing...', WIDTH / 2, HEIGHT / 2);
+//top cross bar
+hudBitmap.fillRect(
+  (WIDTH/2) - (widthBar / 2),
+  (HEIGHT/2) -  (lengthBar + (2*distBar)),
+  widthBar,
+  lengthBar
+);
+
+//bottom cross bar
+hudBitmap.fillRect(
+  (WIDTH/2) - (widthBar / 2),
+  (HEIGHT/2) + (2 * distBar),
+  widthBar,
+  lengthBar
+);
+
+//right cross bar
+hudBitmap.fillRect(
+  (WIDTH/2) + (distBar),
+  (HEIGHT/2) - (2* widthBar/2),
+  lengthBar / 2,
+  widthBar * 2
+);
+
+//left cross bar
+hudBitmap.fillRect(
+  (WIDTH/2) - (distBar + (lengthBar / 2)),
+  (HEIGHT/2) - (2 * widthBar/2),
+  lengthBar / 2,
+  widthBar * 2
+);
+//hudBitmap.fillText('Initializing...', WIDTH / 2, HEIGHT / 2);
 
 //create new camera in orthographic scene
 var cameraHUD = new THREE.OrthographicCamera(-WIDTH/2, WIDTH/2, HEIGHT/2, -HEIGHT/2, 0, 30 );
+//cameraHUD.aspect = WIDTH/HEIGHT;//fixing aspect ratio
+
 
 //create new scene for hud
 var sceneHUD = new THREE.Scene();
@@ -545,11 +591,61 @@ document.onkeydown  = function ( event ) {//called when keys are pressed
 //     //socket.emit('keyPress', {inputId:'shoot', state:true});//shoots
 //     console.log("success");
 // }, false);
+var bulletID = 1;
+var bulletWidth = 0.05
+const bulletGeometry = new THREE.SphereGeometry( bulletWidth, 10, 10 );
+const bulletMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 var clickFunction = function() {
-  console.log("Bullet Fired");
-  socket.emit('Shoot')
+  //console.log("Bullet Fired");
+  var bulletCam = new THREE.PerspectiveCamera(FOV_degrees,WIDTH/HEIGHT,0.1,1000);//create another camera similar to playercam
+  bulletCam.rotation.copy(camera.rotation);
+  bulletCam.position.copy(camera.position);
+
+  BULLET_CAM_LIST[bulletID + selfID] = bulletCam;
+  const sphere = new THREE.Mesh( bulletGeometry, bulletMaterial );
+  scene.add( sphere );
+  sphere.position.x = bulletCam.position.x;
+  sphere.position.y = bulletCam.position.y;
+  sphere.position.z = bulletCam.position.z;
+  //sphere.name = "" + bulletID;
+  sphere.name = bulletID + selfID;
+  //console.log("Bullet named: " + sphere.name);
+
+  BULLET_MODEL_LIST[bulletID + selfID] = sphere;
+
+  var data = [];
+  var newID = bulletID + selfID;
+  data.push({
+    id:newID,
+    x:sphere.position.x,
+    y:sphere.position.y,
+    z:sphere.position.z
+  });
+  socket.emit('newBullet',data);
+  bulletID = bulletID + 1;
 }
 window.onmousedown = clickFunction;
+
+
+
+socket.on('newBulletPlayer',function(data){
+  const sphere = new THREE.Mesh( bulletGeometry, bulletMaterial );
+  scene.add( sphere );
+  sphere.position.x = data.x;
+  sphere.position.y = data.y;
+  sphere.position.z = data.z;
+  sphere.name = data[0].id;//need some way to remove bullets when collidied
+  ENEMY_BULLET_LIST[data[0].id] = sphere;
+});
+
+socket.on('removeBullet',function(data){
+  var bulletID = data[0].id;
+  var bulletObject = scene.getObjectByName(bulletID);
+  //console.log("attempting to remove bullet " + data[0].id);
+  scene.remove(bulletObject);
+  delete BULLET_CAM_LIST[bulletID];
+  delete BULLET_MODEL_LIST[bulletID];
+});
 
 
 //called when keys are released, sets bools to false and stops movement
@@ -616,6 +712,7 @@ socket.on('gameLoop', function(data){
   //console.log("test");
   //updating position of other players in game
   for(var i = 0; i < data.length; i++){
+    if (data[i].type == 'Player'){
     //console.log("setting player " + i + " position to " + data[i].x + "," + data[i].z);
     //console.log("recieved " + data[i].x + " for player " + data[i].id);
     if(OTHER_PLAYER_LIST[data[i].id].position.x != data[i].x){
@@ -644,8 +741,22 @@ socket.on('gameLoop', function(data){
         GUN_LIST[data[i].id]._UpdateDirectionSelf(data[i].cameraX,data[i].cameraZ);
       }
     }
-
   }
+  }
+
+  //loop through bullet
+  for(var i = 0; i < data.length; i++){
+    if (data[i].type == 'Bullet'){
+      //console.log("Bullet " + i);
+      if (ENEMY_BULLET_LIST[data[i].id]){
+        //console.log("Bullet Found");
+        ENEMY_BULLET_LIST[data[i].id].position.x = data[i].x;
+        ENEMY_BULLET_LIST[data[i].id].position.y = data[i].y;
+        ENEMY_BULLET_LIST[data[i].id].position.z = data[i].z;
+      }
+    }
+  }
+
 
   if (sprint){
     playerSpeed = 0.1;
@@ -753,7 +864,18 @@ socket.on('gameLoop', function(data){
     selfGun._UpdatePosition(camera.position.x, camera.position.y,  camera.position.z);
   }
 
+  for (var b = 1; b < bulletID; b++){
+    if(BULLET_CAM_LIST[b + selfID]){
+      BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed);
+      BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
+      BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
+      BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
+
+    }
+  }
+
   sendPlayerInfo();
+  sendBulletInfo();
   update();
   render();
 
@@ -799,6 +921,39 @@ var sendPlayerInfo = function(){
   });
   socket.emit('selfMoveInfo',data);
 };
+
+var sendBulletInfo = function (){
+  var data = [];
+
+  for (var i = 1; i < bulletID; i++){
+    if(BULLET_CAM_LIST[i + selfID]){
+      var bID = parseFloat(BULLET_MODEL_LIST[i + selfID].name);
+      //console.log("sending bullet id as " + bID);
+      data.push({
+        x:BULLET_CAM_LIST[i + selfID].position.x,
+        y:BULLET_CAM_LIST[i + selfID].position.y,
+        z:BULLET_CAM_LIST[i + selfID].position.z,
+        name:BULLET_MODEL_LIST[i + selfID].name,
+        id:bID
+      });
+    }
+  }
+  socket.emit('bulletInfo',data);
+}
+
+socket.on('bulletCollision',function(data) {
+  var bulletID = parseFloat(data[0].bulletName);
+  if (selfID == data[0].playerID){//current player has been killed
+    console.log("Killed by player: " + data[0].killerID);
+    camera.position.y = 50;
+    camera.position.x = 0;
+    camera.position.z = 0;
+  }
+  if (selfID == data[0].killerID){
+    console.log("Killed player: " + data[0].playerID);
+  }
+
+});
 
 //game logic
 var update = function(){
@@ -869,12 +1024,17 @@ var render = function() {
   renderer.render(scene,camera);
   renderer.autoClear = false;
 
-  //render hud
-  // hudBitmap.clearRect(0, 0, WIDTH, HEIGHT);
-  // hudBitmap.fillText("test",WIDTH/2,HEIGHT/2);
-  hudBitmap.fillText('test', WIDTH / 2, HEIGHT / 2);
-
   hudTexture.needsUpdate = true;
+  //render hud
+  //hudBitmap.clearRect(0, 0, WIDTH, HEIGHT);
+  hudBitmap.font = "Normal 40px Arial";
+  hudBitmap.textAlign = 'center';
+  hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
+  hudBitmap.fillText('Test', WIDTH / 2, HEIGHT / 2);
+
+  // hudBitmap.fillText("test",WIDTH/2,HEIGHT/2);
+  //hudBitmap.fillText('test', WIDTH / 2, HEIGHT / 2);
+
 
   renderer.render(sceneHUD, cameraHUD);
 
