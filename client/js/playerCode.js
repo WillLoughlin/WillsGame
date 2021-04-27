@@ -108,6 +108,46 @@ const geometryPlayerBox = new THREE.BoxGeometry(0.5,2,0.5);
 const materialBox = new THREE.MeshBasicMaterial( {color: 0x336BFF, wireframe:true} );
 //cylinder = new THREE.Mesh( geometry, material );
 
+//create gui
+var reticleWidth = 0.01;
+var reticleHeight = 0.015;
+var reticleDist = 0.015;
+
+const reticleGeometryTop = new THREE.BoxGeometry( reticleWidth, reticleHeight, reticleHeight);
+const reticleMaterial = new THREE.MeshBasicMaterial( {color: 0x00FFFF} );
+const cube = new THREE.Mesh( reticleGeometryTop, reticleMaterial );
+cube.position.x = 0;
+cube.position.y = reticleDist;
+cube.position.z = -1;
+//scene.add(cube);
+camera.add(cube);
+
+const reticleGeometrySide = new THREE.BoxGeometry( reticleHeight, reticleWidth, reticleWidth);
+const cube2 = new THREE.Mesh( reticleGeometrySide, reticleMaterial );
+cube2.position.x = reticleDist;
+cube2.position.y = 0;
+cube2.position.z = -1;
+//scene.add(cube);
+camera.add(cube2);
+
+const cube3 = new THREE.Mesh( reticleGeometrySide, reticleMaterial );
+cube3.position.x = -1 * reticleDist;
+cube3.position.y = 0;
+cube3.position.z = -1;
+//scene.add(cube);
+camera.add(cube3);
+
+const cube4 = new THREE.Mesh( reticleGeometryTop, reticleMaterial );
+cube4.position.x = 0;
+cube4.position.y = -1 * reticleDist;
+cube4.position.z = -1;
+//scene.add(cube);
+camera.add(cube4);
+
+
+
+
+
 
 //----------------Drawing other players in game-----------------------//
 //www.youtube.com/watch?v=EkPfhzIbp2g&ab_channel=SimonDev
@@ -145,6 +185,7 @@ const texture = loader.load([
     './client/resources/posz.jpg',
     './client/resources/negz.jpg',
 ]);
+
 scene.background = texture;
 
 
@@ -459,18 +500,26 @@ var numBlocks = 0;
 socket.on('initBlocks', function(blocks){
   for (var i = 0; i < blocks.length; i++){
     var blockGeometry = new THREE.BoxGeometry(blocks[i].width,blocks[i].height,blocks[i].height);//width,depth,HEIGHT
-    var blockMaterials =
-    [
-      new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//right side
-      new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//left side
-      new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgTop),side: THREE.DoubleSide}),//top side
-      new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgBottom),side: THREE.DoubleSide}),//bottom side
-      new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//front side
-      new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//back side
-    ];//each image corresponds to different side
+    // var blockMaterials =
+    // [
+    //   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//right side
+    //   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//left side
+    //   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgTop),side: THREE.DoubleSide}),//top side
+    //   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgBottom),side: THREE.DoubleSide}),//bottom side
+    //   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//front side
+    //   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//back side
+    // ];//each image corresponds to different side
+    var blockMaterials = new THREE.MeshBasicMaterial( {color: 0xA9A9A9} );
+
+    const wireframeGeometry = new THREE.WireframeGeometry(geometry);
+		const wireframeMaterial = new THREE.LineBasicMaterial({color: 0x000000});
+		const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+		wireframe.name = 'wireframe';
 
     //add materials and then add cube
     var block = new THREE.Mesh(blockGeometry, blockMaterials);
+    block.add(wireframe);
+
     block.position.x = blocks[i].x;
     block.position.y = blocks[i].y;
     block.position.z = blocks[i].z;
@@ -1022,7 +1071,7 @@ var distanceTwoPoints = function(x1,y1,z1,x2,y2,z2){
 //draw scene
 var render = function() {
   renderer.render(scene,camera);
-  renderer.autoClear = false;
+  //renderer.autoClear = false;
 
   //hudTexture.needsUpdate = true;
   //render hud
