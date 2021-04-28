@@ -145,6 +145,92 @@ cube4.position.z = -1;
 camera.add(cube4);
 
 
+//---------------------------Bottom Right GUI--------------------------------//
+
+// var guiDistX = 0.92;
+// var guiDistY = 0.65;
+var guiDistX = 0.46;
+var guiDistY = 0.32;
+
+const bottomRightGeometry = new THREE.BoxGeometry( 0.25, 0.25, 0.001);
+//const reticleMaterial = new THREE.MeshBasicMaterial( {color: 0x00FFFF} );
+//const bottomRightGUI = new THREE.Mesh( reticleGeometryTop, reticleMaterial );
+
+var canvasBR = document.createElement('canvas').getContext('2d');
+canvasBR.canvas.width = 256;
+canvasBR.canvas.height = 256;
+canvasBR.fillStyle = '#FFF';
+canvasBR.fillRect(0, 0, canvasBR.canvas.width, canvasBR.canvas.height);
+const textureBR = new THREE.CanvasTexture(canvasBR.canvas);
+const materialBR = new THREE.MeshBasicMaterial({
+  map: textureBR,
+  opacity: 0.5,
+  transparent: true,
+});
+const bottomRightGUI = new THREE.Mesh(bottomRightGeometry, materialBR);
+bottomRightGUI.position.x = guiDistX;
+bottomRightGUI.position.y = -1 * guiDistY;
+bottomRightGUI.position.z = -0.5;
+camera.add(bottomRightGUI);
+bottomRightGUI.material.map.needsUpdate = true;
+
+canvasBR.fillStyle = '#000';
+// canvasBR.fillRect(10,10,10,10);
+
+canvasBR.font = "20px Georgia";
+canvasBR.fillText("Bottom Right GUI", 10, 50);
+//--------------------End Bottom Right GUI----------------------------//
+
+//-------------------Bottom Left GUI----------------------------------//
+
+const bottomLeftGeometry = new THREE.BoxGeometry( 0.25, 0.25, 0.001);
+var canvasBL = document.createElement('canvas').getContext('2d');
+canvasBL.canvas.width = 256;
+canvasBL.canvas.height = 256;
+canvasBL.fillStyle = '#FFF';
+canvasBL.fillRect(0, 0, canvasBL.canvas.width, canvasBL.canvas.height);
+const textureBL = new THREE.CanvasTexture(canvasBL.canvas);
+const materialBL = new THREE.MeshBasicMaterial({
+  map: textureBL,
+  opacity: 0.5,
+  transparent: true,
+});
+const bottomLeftGUI = new THREE.Mesh(bottomLeftGeometry, materialBL);
+bottomLeftGUI.position.x = -1 * guiDistX;
+bottomLeftGUI.position.y = -1 * guiDistY;
+bottomLeftGUI.position.z = -0.5;
+camera.add(bottomLeftGUI);
+bottomLeftGUI.material.map.needsUpdate = true;
+
+canvasBL.fillStyle = '#000';
+canvasBL.font = "20px Georgia";
+canvasBL.fillText("Bottom left GUI", 10, 50);
+
+//------------------End Bottom Left GUI-----------------------//
+
+//--------------------Top Left GUI-------------------------//
+const topLeftGeometry = new THREE.BoxGeometry( 0.15, 0.15, 0.001);
+var canvasTL = document.createElement('canvas').getContext('2d');
+canvasTL.canvas.width = 256;
+canvasTL.canvas.height = 256;
+canvasTL.fillStyle = '#FFF';
+canvasTL.fillRect(0, 0, canvasTL.canvas.width, canvasTL.canvas.height);
+const textureTL = new THREE.CanvasTexture(canvasTL.canvas);
+const materialTL = new THREE.MeshBasicMaterial({
+  map: textureTL,
+  opacity: 0.5,
+  transparent: true,
+});
+const topLeftGUI = new THREE.Mesh(topLeftGeometry, materialTL);
+topLeftGUI.position.x = -1 * guiDistX - 0.05;
+topLeftGUI.position.y = guiDistY - 0.11;
+topLeftGUI.position.z = -0.5;
+camera.add(topLeftGUI);
+topLeftGUI.material.map.needsUpdate = true;
+
+canvasTL.fillStyle = '#000';
+canvasTL.font = "20px Georgia";
+canvasTL.fillText("Map Here", 10, 100);
 
 
 

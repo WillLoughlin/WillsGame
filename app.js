@@ -151,7 +151,7 @@ Object.defineProperty(Bullet.prototype, 'constructor', {
 //id, x, y, z, type, width, height, imgSides, imgTop, imgBottom){
 
 
-
+//should be -4 and 5
 var counter = 1;
 for (var i = -4; i < 5; i++){
   for(var j = -4; j < 5; j++){
