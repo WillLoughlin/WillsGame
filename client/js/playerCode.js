@@ -30,9 +30,14 @@ var ENEMY_BULLET_LIST = {};
 
 var playerBoundingBox = false;
 
+var kills = 0;
+var deaths = 0;
+
 //These get updated from the Server on connection
 var playerSpeed = 0.05;
 var playerHeight = 2;
+
+var showCollisionOutline = true;
 
 var velocityUp = 0;
 var gravSpeed = 0.01;
@@ -401,6 +406,64 @@ class LoadPlayerModel {
         idle.play();
       });
       scene.add(fbx);
+      // const materialBR = new THREE.MeshBasicMaterial({
+      //   map: textureBR,
+      //   opacity: 0.5,
+      //   transparent: true,
+      // });
+
+      const sphereGeom = new THREE.SphereGeometry( 12, 16, 16 );
+      if (showCollisionOutline){
+        var sphereMat = new THREE.MeshBasicMaterial( {color: 0xffff00, wireframe:true} );
+      } else {
+        var sphereMat = new THREE.MeshBasicMaterial( {color: 0xffff00, wireframe:true, opacity:0, transparent:true} );
+      }
+      const sphere1 = new THREE.Mesh( sphereGeom, sphereMat );
+      sphere1.position.x = -10;
+      sphere1.position.z = -6;
+      fbx.add(sphere1);
+
+      const sphereGeom2 = new THREE.SphereGeometry( 17, 16, 16 );
+      const sphere2 = new THREE.Mesh(sphereGeom2, sphereMat);
+      sphere2.position.y = -25;
+      sphere2.position.z = -10;
+      sphere2.position.x = 8;
+      fbx.add(sphere2);
+
+      const sphereGeom3 = new THREE.SphereGeometry( 17, 16, 16 );
+      const sphere3 = new THREE.Mesh(sphereGeom3, sphereMat);
+      sphere3.position.y = -25;
+      sphere3.position.z = -20;
+      sphere3.position.x = -10;
+      fbx.add(sphere3);
+
+      const sphereGeom4 = new THREE.SphereGeometry( 17, 16, 16 );
+      const sphere4 = new THREE.Mesh(sphereGeom4, sphereMat);
+      sphere4.position.y = -45;
+      sphere4.position.z = -18;
+      sphere4.position.x = 0;
+      fbx.add(sphere4);
+
+      const sphereGeom5 = new THREE.SphereGeometry( 18, 16, 16 );
+      const sphere5 = new THREE.Mesh(sphereGeom5, sphereMat);
+      sphere5.position.y = -60;
+      sphere5.position.z = -16;
+      sphere5.position.x = 2;
+      fbx.add(sphere5);
+
+      const sphereGeom6 = new THREE.SphereGeometry( 12, 16, 16 );
+      const sphere6 = new THREE.Mesh(sphereGeom6, sphereMat);
+      sphere6.position.y = -80;
+      sphere6.position.z = -3;
+      sphere6.position.x = 11;
+      fbx.add(sphere6);
+
+      const sphereGeom7 = new THREE.SphereGeometry( 12, 16, 16 );
+      const sphere7 = new THREE.Mesh(sphereGeom7, sphereMat);
+      sphere7.position.y = -80;
+      sphere7.position.z = -20;
+      sphere7.position.x = -12;
+      fbx.add(sphere7);
     });
   }
 
@@ -628,6 +691,11 @@ socket.on('newPlayer',function(newPlayer){
     scene.add(OTHER_PLAYER_LIST[newPlayer.id]);//adding new player to scene
   }
   var playerModel = new LoadPlayerModel(newPlayer.id + "", newPlayer.x,newPlayer.y - 1,newPlayer.z);
+  // const sphereGeom = new THREE.SphereGeometry( 0.5, 16, 16 );
+  // const sphereMat = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+  // const sphere1 = new THREE.Mesh( sphereGeom, sphereMat );
+  // playerModel.add(sphere1);
+  //scene.add( sphere );
   console.log("Player model added in newPlayer for player " + newPlayer.id);
   PLAYER_MODEL_LIST[newPlayer.id] = playerModel;
   var gunModel = new LoadGun(newPlayer.id + "gun", newPlayer.x,newPlayer.y - 1,newPlayer.z);
@@ -762,6 +830,54 @@ var clickFunction = function() {
 window.onmousedown = clickFunction;
 
 
+//-------------------Changing bullet collision detection to inside player browser-----------------//
+
+var checkCollisionAllBullets = function () {
+  for (var i in BULLET_MODEL_LIST){
+    var collisionCheck = checkCollisionBulletPlayersHelper(BULLET_MODEL_LIST[i].position.x,BULLET_MODEL_LIST[i].position.y,BULLET_MODEL_LIST[i].position.z,BULLET_MODEL_LIST[i].name);
+    // if (collisionCheck != -1){
+    //   //socket.emit('playerShot',{playerID:collisionCheck,bulletID:i.name});
+    //   console.log("Bullet " + BULLET_MODEL_LIST[i].name + " hit player " + collisionCheck);
+    // }
+  }
+
+}
+
+var playerDist;
+var checkCollisionBulletPlayersHelper = function (x,y,z,name){
+  var lowDist = 100;
+  for (var i in OTHER_PLAYER_LIST){
+
+    //console.log(OTHER_PLAYER_LIST[i].position.x)
+    playerDist = distanceTwoPoints(x,y,z,OTHER_PLAYER_LIST[i].position.x,OTHER_PLAYER_LIST[i].position.y + 1,OTHER_PLAYER_LIST[i].position.z);
+    //console.log("dist: " + playerDist);
+    if (playerDist < lowDist){
+      lowDist = playerDist;
+    }
+    if (i != selfID){
+      if (playerDist < 0.5){//add collision detection points here, as of now it is just 0.5 distance from camera
+        //console.log("Collision between bullet " + name + " and player " + i);
+        socket.emit('playerShot', {bulletID:name,killedID:i,killerID:selfID});
+        return i;
+    }
+
+  }
+  }
+  if (lowDist > 50){
+    socket.emit('removeBulletSend',{bulletID:name});
+    //add socket emit remove bullet
+    //removeBulletFromServer(name);
+    //console.log("Bullet " + name + " removed for distance");
+  }
+  return -1;
+}
+
+
+//-------------------Changing bullet collision detection to inside player browser-----------------//
+
+
+
+
 
 socket.on('newBulletPlayer',function(data){
   const sphere = new THREE.Mesh( bulletGeometry, bulletMaterial );
@@ -776,7 +892,7 @@ socket.on('newBulletPlayer',function(data){
 socket.on('removeBullet',function(data){
   var bulletID = data[0].id;
   var bulletObject = scene.getObjectByName(bulletID);
-  console.log("attempting to remove bullet " + data[0].id);
+  //console.log("attempting to remove bullet " + data[0].id);
   scene.remove(bulletObject);
   delete BULLET_CAM_LIST[bulletID];
   delete BULLET_MODEL_LIST[bulletID];
@@ -789,25 +905,25 @@ document.onkeyup = function ( event ) {
 	   case 'ArrowUp':
 	   case 'KeyW':
 		   moveForward = false;
-       socket.emit('keyPress', {inputId:'up',state:false});
+       //socket.emit('keyPress', {inputId:'up',state:false});
 		   break;
 
 	   case 'ArrowLeft':
 	   case 'KeyA':
 		   moveLeft = false;
-       socket.emit('keyPress', {inputId:'left',state:false});
+       //socket.emit('keyPress', {inputId:'left',state:false});
 		   break;
 
 	   case 'ArrowDown':
 	   case 'KeyS':
 		   moveBackward = false;
-       socket.emit('keyPress', {inputId:'down',state:false});
+       //socket.emit('keyPress', {inputId:'down',state:false});
 		   break;
 
 	   case 'ArrowRight':
 	   case 'KeyD':
 	     moveRight = false;
-       socket.emit('keyPress', {inputId:'right',state:false});
+       //socket.emit('keyPress', {inputId:'right',state:false});
 		   break;
 
      case 'ShiftLeft':
@@ -946,35 +1062,6 @@ socket.on('gameLoop', function(data){
     camera.position.addScaledVector(vecZ,-1 * playerSpeed * direction.z);
   }
 
-  //console.log("Time: " + clock.getDelta());
-  //amountTime = amountTime + clock.getDelta();
-  // clock.stop();
-  //
-  // if (timerCounter == 64){
-  //   timerCounter = 0;
-  //   console.log("Time for 64 cycles: " + amountTime);
-  //   amountTime = 0.0;
-  // }
-
-/*//code to count how many cycles per second (64)
-  if (clock2.getElapsedTime() > 5 && clock2.getElapsedTime() < 7){
-      cycleCounter = cycleCounter + 1;
-  }
-  if (clock2.getElapsedTime() > 7 && clock2.getElapsedTime() < 8){
-    console.log("Cycles in 2 seconds: " + cycleCounter);
-  }
-*/
-
-  //old controls
-  //controls.moveRight(playerSpeed * direction.x);
-
-  // if(checkCollisionPlayerSideBlocks()){
-  //   controls.moveRight(-playerSpeed * direction.x);
-  // }
-  // controls.moveForward(playerSpeed * direction.z);
-  // if(checkCollisionPlayerSideBlocks()){
-  //   controls.moveForward(-playerSpeed * direction.z);
-  // }
 
 
   //gravity
@@ -1011,6 +1098,7 @@ socket.on('gameLoop', function(data){
 
   sendPlayerInfo();
   sendBulletInfo();
+  checkCollisionAllBullets();
   update();
   render();
 
@@ -1077,15 +1165,18 @@ var sendBulletInfo = function (){
 }
 
 socket.on('bulletCollision',function(data) {
-  var bulletID = parseFloat(data[0].bulletName);
-  if (selfID == data[0].playerID){//current player has been killed
-    console.log("Killed by player: " + data[0].killerID);
+  var bulletID = parseFloat(data.bulletName);
+  //console.log("Comparing " + selfID + " to " + data.playerID);
+  if (selfID == data.playerID){//current player has been killed
+    //console.log("Killed by player: " + data.killerID);
     camera.position.y = 50;
     camera.position.x = 0;
     camera.position.z = 0;
+    deaths = deaths + 1;
   }
-  if (selfID == data[0].killerID){
-    console.log("Killed player: " + data[0].playerID);
+  if (selfID == data.killerID){
+    //console.log("Killed player: " + data.playerID);
+    kills = kills + 1;
   }
 
 });

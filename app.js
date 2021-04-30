@@ -293,48 +293,71 @@ var bulletThresholdDistance = 50;
       BULLET_LIST[data[i].id].z = data[i].z;
     }
 
-      var idCollision = checkCollisionBulletPlayers(data[i].x,data[i].y,data[i].z,data[i].id,player.id);
-      if (idCollision != -1){//collision detected with data[i] bullet and player with idCollision
-        console.log("collision detected, Bullet: " + data[i].name + " Player: " + idCollision);
-        newData.push({
-          bulletName:data[i].name,
-          bulletX:data[i].x,
-          bulletY:data[i].y,
-          bulletZ:data[i].z,
-          playerID:idCollision,
-          killerID:player.id
-        });
-
-        for (var s in SOCKET_LIST){
-          SOCKET_LIST[s].emit('bulletCollision',newData);
-          //console.log("Bullet removed for collision");
-          removeBulletFromServer(data[i].name);
-        }
-        //socket.emit('bulletCollision',newData);
-      }
+      // var idCollision = checkCollisionBulletPlayers(data[i].x,data[i].y,data[i].z,data[i].id,player.id);
+      // if (idCollision != -1){//collision detected with data[i] bullet and player with idCollision
+      //   console.log("collision detected, Bullet: " + data[i].name + " Player: " + idCollision);
+      //   newData.push({
+      //     bulletName:data[i].name,
+      //     bulletX:data[i].x,
+      //     bulletY:data[i].y,
+      //     bulletZ:data[i].z,
+      //     playerID:idCollision,
+      //     killerID:player.id
+      //   });
+      //
+      //   for (var s in SOCKET_LIST){
+      //     SOCKET_LIST[s].emit('bulletCollision',newData);
+      //     //console.log("Bullet removed for collision");
+      //     removeBulletFromServer(data[i].name);
+      //   }
+      //   //socket.emit('bulletCollision',newData);
+      // }
     }
   });
+
+  //-------new collision bullets--------------//
+
+  //playerCode will send this when bullet collision detected with other player
+  socket.on('playerShot', function(data){
+    //console.log("Player " + data.killedID + " killed by " + data.killerID + " with bullet " + data.bulletID);
+    for (var s in SOCKET_LIST){
+      SOCKET_LIST[s].emit('bulletCollision', {bulletName:data.bulletID,playerID:data.killedID,killerID:data.killerID});
+    }
+
+    //removeBulletFromServer(data.bulletID);
+    //first kill player hit
+  });
+
+  //playerCode will send this when it wants to remove a bullet from the server
+  socket.on('removeBulletSend', function(data){
+    removeBulletFromServer(data.bulletID);
+  });
+
+
+
+  //---------end new collision-------------//
 
   /*
     This function recieves keypress information from the user
   */
-  socket.on('keyPress',function(data){//called when player presses a key
-    if(data.inputId === 'left'){
-      player.pressingLeft = data.state;
-    } else if (data.inputId === 'right'){
-      player.pressingRight = data.state;
-    } else if (data.inputId === 'up'){
-      player.pressingUp = data.state;
-    } else if (data.inputId === 'down'){
-      player.pressingDown = data.state;
-    } else if (data.inputId === 'jump'){
-      player.verticalUp = data.state;
-    } else if (data.inputId === 'shift'){
-      player.verticalDown = data.state;
-    }
-  });
+  // socket.on('keyPress',function(data){//called when player presses a key
+  //   if(data.inputId === 'left'){
+  //     player.pressingLeft = data.state;
+  //   } else if (data.inputId === 'right'){
+  //     player.pressingRight = data.state;
+  //   } else if (data.inputId === 'up'){
+  //     player.pressingUp = data.state;
+  //   } else if (data.inputId === 'down'){
+  //     player.pressingDown = data.state;
+  //   } else if (data.inputId === 'jump'){
+  //     player.verticalUp = data.state;
+  //   } else if (data.inputId === 'shift'){
+  //     player.verticalDown = data.state;
+  //   }
+  // });
 });
 
+/*
 var playerDist;
 
 var checkCollisionBulletPlayers = function (x,y,z,name,selfID){
@@ -363,6 +386,7 @@ var distanceTwoPoints = function(x1,y1,z1,x2,y2,z2){
   var dist = Math.sqrt(sum);
   return dist;
 }
+*/
 
 var removeBulletFromServer = function(name){
   var bulletID = [];
@@ -377,6 +401,9 @@ var removeBulletFromServer = function(name){
   }
   delete BULLET_LIST[name];
 }
+
+
+
 
 
 
@@ -413,43 +440,6 @@ setInterval(function(){//game loop
       type:'Bullet'
     })
   }
-
-  //Old included in pack:
-  // height:player.height,
-  // width:player.width,
-  // type:player.type,
-  // pressingRight:player.pressingRight,
-  // pressingLeft:player.pressingLeft,
-  // pressingUp:player.pressingUp,
-  // pressingDown:player.pressingDown
-
-  // for (var i in BLOCK_LIST){
-  //   var block = BLOCK_LIST[i];
-  //   pack.push({
-  //     id:block.id,
-  //     x:block.x,
-  //     y:block.y,
-  //     z:block.z,
-  //     height:block.height,
-  //     width:block.width,
-  //     imgSides:block.imgSides,
-  //     imgTop:block.imgTop,
-  //     imgBottom:block.imgBottom,
-  //     type:block.type
-  //   });
-  // }
-
-  // for (var i in POINT_LIST){
-  //   var point = POINT_LIST[i];
-  //   pack.push({
-  //     x:point.x,
-  //     y:point.y,
-  //     z:point.z,
-  //     isPoint:true,
-  //     isPlayer:false,
-  //     isBlock:false
-  //   });
-  // }
 
   for (var i in SOCKET_LIST){
     var socket = SOCKET_LIST[i];
