@@ -37,7 +37,7 @@ var deaths = 0;
 var playerSpeed = 0.05;
 var playerHeight = 2;
 
-var showCollisionOutline = true;
+var showCollisionOutline = false;//set to true to see spheres used in collision detection
 
 var velocityUp = 0;
 var gravSpeed = 0.01;
@@ -169,7 +169,7 @@ canvasBR.fillRect(0, 0, canvasBR.canvas.width, canvasBR.canvas.height);
 const textureBR = new THREE.CanvasTexture(canvasBR.canvas);
 const materialBR = new THREE.MeshBasicMaterial({
   map: textureBR,
-  opacity: 0.5,
+  opacity: 0.8,
   transparent: true,
 });
 const bottomRightGUI = new THREE.Mesh(bottomRightGeometry, materialBR);
@@ -197,7 +197,7 @@ canvasBL.fillRect(0, 0, canvasBL.canvas.width, canvasBL.canvas.height);
 const textureBL = new THREE.CanvasTexture(canvasBL.canvas);
 const materialBL = new THREE.MeshBasicMaterial({
   map: textureBL,
-  opacity: 0.5,
+  opacity: 1,
   transparent: true,
 });
 const bottomLeftGUI = new THREE.Mesh(bottomLeftGeometry, materialBL);
@@ -223,7 +223,7 @@ canvasTL.fillRect(0, 0, canvasTL.canvas.width, canvasTL.canvas.height);
 const textureTL = new THREE.CanvasTexture(canvasTL.canvas);
 const materialTL = new THREE.MeshBasicMaterial({
   map: textureTL,
-  opacity: 0.5,
+  opacity: 0.8,
   transparent: true,
 });
 const topLeftGUI = new THREE.Mesh(topLeftGeometry, materialTL);
@@ -413,7 +413,7 @@ class LoadPlayerModel {
       // });
 
       const sphereGeom = new THREE.SphereGeometry( 12, 16, 16 );
-      if (showCollisionOutline){
+      if (showCollisionOutline){//if variable is true spheres created and visible, if not spheres created translucent
         var sphereMat = new THREE.MeshBasicMaterial( {color: 0xffff00, wireframe:true} );
       } else {
         var sphereMat = new THREE.MeshBasicMaterial( {color: 0xffff00, wireframe:true, opacity:0, transparent:true} );
@@ -422,6 +422,7 @@ class LoadPlayerModel {
       sphere1.position.x = -10;
       sphere1.position.z = -6;
       fbx.add(sphere1);
+      this.s1 = sphere1;
 
       const sphereGeom2 = new THREE.SphereGeometry( 17, 16, 16 );
       const sphere2 = new THREE.Mesh(sphereGeom2, sphereMat);
@@ -429,6 +430,7 @@ class LoadPlayerModel {
       sphere2.position.z = -10;
       sphere2.position.x = 8;
       fbx.add(sphere2);
+      this.s2 = sphere2;
 
       const sphereGeom3 = new THREE.SphereGeometry( 17, 16, 16 );
       const sphere3 = new THREE.Mesh(sphereGeom3, sphereMat);
@@ -436,6 +438,7 @@ class LoadPlayerModel {
       sphere3.position.z = -20;
       sphere3.position.x = -10;
       fbx.add(sphere3);
+      this.s3 = sphere3;
 
       const sphereGeom4 = new THREE.SphereGeometry( 17, 16, 16 );
       const sphere4 = new THREE.Mesh(sphereGeom4, sphereMat);
@@ -443,6 +446,7 @@ class LoadPlayerModel {
       sphere4.position.z = -18;
       sphere4.position.x = 0;
       fbx.add(sphere4);
+      this.s4 = sphere4;
 
       const sphereGeom5 = new THREE.SphereGeometry( 18, 16, 16 );
       const sphere5 = new THREE.Mesh(sphereGeom5, sphereMat);
@@ -450,6 +454,7 @@ class LoadPlayerModel {
       sphere5.position.z = -16;
       sphere5.position.x = 2;
       fbx.add(sphere5);
+      this.s5 = sphere5;
 
       const sphereGeom6 = new THREE.SphereGeometry( 12, 16, 16 );
       const sphere6 = new THREE.Mesh(sphereGeom6, sphereMat);
@@ -457,6 +462,7 @@ class LoadPlayerModel {
       sphere6.position.z = -3;
       sphere6.position.x = 11;
       fbx.add(sphere6);
+      this.s6 = sphere6;
 
       const sphereGeom7 = new THREE.SphereGeometry( 12, 16, 16 );
       const sphere7 = new THREE.Mesh(sphereGeom7, sphereMat);
@@ -464,6 +470,7 @@ class LoadPlayerModel {
       sphere7.position.z = -20;
       sphere7.position.x = -12;
       fbx.add(sphere7);
+      this.s7 = sphere7;
     });
   }
 
@@ -471,6 +478,48 @@ class LoadPlayerModel {
     if (this._controls){
       this._controls.updatePosition(x,y,z);
     }
+  }
+
+  _Get_S1_Pos(){
+    var v3 = new THREE.Vector3();
+    this.s1.getWorldPosition(v3);
+    return v3;
+  }
+
+  _Get_S2_Pos(){
+    var v3 = new THREE.Vector3();
+    this.s2.getWorldPosition(v3);
+    return v3;
+  }
+
+  _Get_S3_Pos(){
+    var v3 = new THREE.Vector3();
+    this.s3.getWorldPosition(v3);
+    return v3;
+  }
+
+  _Get_S4_Pos(){
+    var v3 = new THREE.Vector3();
+    this.s4.getWorldPosition(v3);
+    return v3;
+  }
+
+  _Get_S5_Pos(){
+    var v3 = new THREE.Vector3();
+    this.s5.getWorldPosition(v3);
+    return v3;
+  }
+
+  _Get_S6_Pos(){
+    var v3 = new THREE.Vector3();
+    this.s6.getWorldPosition(v3);
+    return v3;
+  }
+
+  _Get_S7_Pos(){
+    var v3 = new THREE.Vector3();
+    this.s7.getWorldPosition(v3);
+    return v3;
   }
 
 
@@ -552,96 +601,6 @@ socket.on('initPlayers', function(players){
 });
 //-------------------End drawing other players---------------------//
 
-//-----------------------Add Reticle-----------------------//
-/*//how to add a line to the scene
-const reticleMaterial = new THREE.LineBasicMaterial( { color: 0x0000ff } );
-const points = [];
-points.push( new THREE.Vector3( - 10, 0, 0 ) );
-points.push( new THREE.Vector3( 0, 10, 0 ) );
-points.push( new THREE.Vector3( 10, 0, 0 ) );
-
-const linegeometry = new THREE.BufferGeometry().setFromPoints( points );
-const line = new THREE.Line( linegeometry, reticleMaterial );
-scene.add(line);
-*/
-
-//hud:
-//https://stackoverflow.com/questions/12667507/drawing-ui-elements-directly-to-the-webgl-area-with-three-js
-
-//Crosshair variables
-var widthBar = 2;
-var lengthBar = 8;
-var distBar = 1;
-
-
-//Create 2d canvas to draw hud
-var hudCanvas = document.createElement('canvas');
-
-//set dimensions to screen
-hudCanvas.width = WIDTH;
-hudCanvas.height = HEIGHT;
-
-//get 2d context and draw test
-var hudBitmap = hudCanvas.getContext('2d');
-//hudBitmap.font = "Normal 40px Arial";
-//hudBitmap.textAlign = 'center';
-hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
-//top cross bar
-hudBitmap.fillRect(
-  (WIDTH/2) - (widthBar / 2),
-  (HEIGHT/2) -  (lengthBar + (2*distBar)),
-  widthBar,
-  lengthBar
-);
-
-//bottom cross bar
-hudBitmap.fillRect(
-  (WIDTH/2) - (widthBar / 2),
-  (HEIGHT/2) + (2 * distBar),
-  widthBar,
-  lengthBar
-);
-
-//right cross bar
-hudBitmap.fillRect(
-  (WIDTH/2) + (distBar),
-  (HEIGHT/2) - (2* widthBar/2),
-  lengthBar / 2,
-  widthBar * 2
-);
-
-//left cross bar
-hudBitmap.fillRect(
-  (WIDTH/2) - (distBar + (lengthBar / 2)),
-  (HEIGHT/2) - (2 * widthBar/2),
-  lengthBar / 2,
-  widthBar * 2
-);
-//hudBitmap.fillText('Initializing...', WIDTH / 2, HEIGHT / 2);
-
-//create new camera in orthographic scene
-var cameraHUD = new THREE.OrthographicCamera(-WIDTH/2, WIDTH/2, HEIGHT/2, -HEIGHT/2, 0, 30 );
-//cameraHUD.aspect = WIDTH/HEIGHT;//fixing aspect ratio
-
-
-//create new scene for hud
-var sceneHUD = new THREE.Scene();
-
-//create texture for hud
-var hudTexture = new THREE.Texture(hudCanvas)
-hudTexture.needsUpdate = true;
-
-//create material for hud
-var hudmaterial = new THREE.MeshBasicMaterial( {map: hudTexture} );
-hudmaterial.transparent = true;
-
-//create plane in orthographic scene
-var planeGeometry = new THREE.PlaneGeometry( WIDTH, HEIGHT );
-var plane = new THREE.Mesh( planeGeometry, hudmaterial );
-sceneHUD.add( plane );
-
-
-//----------------------End Add Reticle-------------------//
 
 
 var numBlocks = 0;
@@ -850,21 +809,24 @@ var checkCollisionBulletPlayersHelper = function (x,y,z,name){
   for (var i in OTHER_PLAYER_LIST){
 
     //console.log(OTHER_PLAYER_LIST[i].position.x)
-    playerDist = distanceTwoPoints(x,y,z,OTHER_PLAYER_LIST[i].position.x,OTHER_PLAYER_LIST[i].position.y + 1,OTHER_PLAYER_LIST[i].position.z);
+    playerDist = distanceTwoPoints(x,y,z,OTHER_PLAYER_LIST[i].position.x,OTHER_PLAYER_LIST[i].position.y,OTHER_PLAYER_LIST[i].position.z);
     //console.log("dist: " + playerDist);
     if (playerDist < lowDist){
       lowDist = playerDist;
     }
     if (i != selfID){
-      if (playerDist < 0.5){//add collision detection points here, as of now it is just 0.5 distance from camera
+      if (playerDist < 1.5){//add collision detection points here, as of now it is just 0.5 distance from camera
         //console.log("Collision between bullet " + name + " and player " + i);
-        socket.emit('playerShot', {bulletID:name,killedID:i,killerID:selfID});
+        var shot = closeCheckBulletPlayer(x,y,z,i);
+        if (shot){
+          socket.emit('playerShot', {bulletID:name,killedID:i,killerID:selfID});
+        }
         //console.log("Shot player with bullet " + name);
         return i;
+      }
     }
+  }
 
-  }
-  }
   if (lowDist > 50){
     socket.emit('removeBulletSend',{bulletID:name});
     //add socket emit remove bullet
@@ -874,6 +836,72 @@ var checkCollisionBulletPlayersHelper = function (x,y,z,name){
   return -1;
 }
 
+
+//Widths
+// s1: 12 -> .156
+// s2: 17 -> .221
+// s3: 17 -> .221
+// s4: 17 -> .221
+// s5: 18 -> .234
+// s6: 12 -> .156
+// s7: 12 -> .156
+
+//Scale: 0.013
+
+var closeCheckBulletPlayer = function(x,y,z,playerID){
+  var p = PLAYER_MODEL_LIST[playerID];
+  var v3 = p._Get_S1_Pos();
+  var dist = distanceTwoPoints(x,y,z,v3.x,v3.y,v3.z);
+
+  if (dist <= 0.2){
+    return true;
+  }
+
+  v3 = p._Get_S2_Pos();
+  var dist = distanceTwoPoints(x,y,z,v3.x,v3.y,v3.z);
+
+  if (dist <= 0.221){
+    return true;
+  }
+
+  v3 = p._Get_S3_Pos();
+  var dist = distanceTwoPoints(x,y,z,v3.x,v3.y,v3.z);
+
+  if (dist <= 0.221){
+    return true;
+  }
+
+  v3 = p._Get_S4_Pos();
+  var dist = distanceTwoPoints(x,y,z,v3.x,v3.y,v3.z);
+
+  if (dist <= 0.221){
+    return true;
+  }
+
+  v3 = p._Get_S5_Pos();
+  var dist = distanceTwoPoints(x,y,z,v3.x,v3.y,v3.z);
+
+  if (dist <= 0.234){
+    return true;
+  }
+
+  v3 = p._Get_S6_Pos();
+  var dist = distanceTwoPoints(x,y,z,v3.x,v3.y,v3.z);
+
+  if (dist <= 0.2){
+    return true;
+  }
+
+  v3 = p._Get_S7_Pos();
+  var dist = distanceTwoPoints(x,y,z,v3.x,v3.y,v3.z);
+
+  if (dist <= 0.2){
+    return true;
+  }
+
+
+
+}
 
 //-------------------Changing bullet collision detection to inside player browser-----------------//
 
@@ -903,6 +931,7 @@ socket.on('removeBullet',function(data){
   //   console.log("couldnt find bullet");
   // }
   scene.remove(bulletObject);
+
   delete BULLET_CAM_LIST[bulletID];
   delete BULLET_MODEL_LIST[bulletID];
 });
@@ -1108,6 +1137,7 @@ socket.on('gameLoop', function(data){
   sendPlayerInfo();
   sendBulletInfo();
   checkCollisionAllBullets();
+  updateGUI();
   update();
   render();
 
@@ -1274,3 +1304,20 @@ var render = function() {
   //renderer.render(sceneHUD, cameraHUD);
 
 };
+
+
+canvasBR.fillStyle = '#000';
+canvasBR.font = "30px Georgia";
+
+canvasBL.fillStyle = '#000';
+canvasBL.font = "30px Georgia";
+
+var updateGUI = function(){
+  canvasBL.clearRect(0,0,canvasBL.canvas.width, canvasBL.canvas.height);
+  var textBL = "Kills: " + kills;
+  canvasBL.fillText(textBL, 48, 25);
+  var textBL2 = "Deaths: " + deaths;
+  canvasBL.fillText(textBL2,15,60);
+  bottomLeftGUI.material.map.needsUpdate = true;
+
+}
