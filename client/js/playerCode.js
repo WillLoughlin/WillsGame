@@ -811,7 +811,7 @@ var clickFunction = function() {
   sphere.position.y = bulletCam.position.y;
   sphere.position.z = bulletCam.position.z;
   //sphere.name = "" + bulletID;
-  sphere.name = bulletID + selfID;
+  sphere.name = String(bulletID + selfID);
   //console.log("Bullet named: " + sphere.name);
 
   BULLET_MODEL_LIST[bulletID + selfID] = sphere;
@@ -834,7 +834,8 @@ window.onmousedown = clickFunction;
 
 var checkCollisionAllBullets = function () {
   for (var i in BULLET_MODEL_LIST){
-    var collisionCheck = checkCollisionBulletPlayersHelper(BULLET_MODEL_LIST[i].position.x,BULLET_MODEL_LIST[i].position.y,BULLET_MODEL_LIST[i].position.z,BULLET_MODEL_LIST[i].name);
+    //BULLET_MODEL_LIST[i].name
+    var collisionCheck = checkCollisionBulletPlayersHelper(BULLET_MODEL_LIST[i].position.x,BULLET_MODEL_LIST[i].position.y,BULLET_MODEL_LIST[i].position.z,i);
     // if (collisionCheck != -1){
     //   //socket.emit('playerShot',{playerID:collisionCheck,bulletID:i.name});
     //   console.log("Bullet " + BULLET_MODEL_LIST[i].name + " hit player " + collisionCheck);
@@ -858,6 +859,7 @@ var checkCollisionBulletPlayersHelper = function (x,y,z,name){
       if (playerDist < 0.5){//add collision detection points here, as of now it is just 0.5 distance from camera
         //console.log("Collision between bullet " + name + " and player " + i);
         socket.emit('playerShot', {bulletID:name,killedID:i,killerID:selfID});
+        //console.log("Shot player with bullet " + name);
         return i;
     }
 
@@ -885,14 +887,21 @@ socket.on('newBulletPlayer',function(data){
   sphere.position.x = data.x;
   sphere.position.y = data.y;
   sphere.position.z = data.z;
-  sphere.name = data[0].id;//need some way to remove bullets when collidied
+  sphere.name = String(data[0].id);//need some way to remove bullets when collidied
+  //console.log("bullet created with name " + sphere.name);
   ENEMY_BULLET_LIST[data[0].id] = sphere;
 });
 
 socket.on('removeBullet',function(data){
-  var bulletID = data[0].id;
+  var bulletID = String(data[0].id);
   var bulletObject = scene.getObjectByName(bulletID);
-  //console.log("attempting to remove bullet " + data[0].id);
+  //console.log("attempting to remove bullet with name " + data[0].id);
+  //console.log("Bullet name: " + bulletObject.name);
+  // if (bulletObject){
+  //   console.log("Found bullet");
+  // } else {
+  //   console.log("couldnt find bullet");
+  // }
   scene.remove(bulletObject);
   delete BULLET_CAM_LIST[bulletID];
   delete BULLET_MODEL_LIST[bulletID];
@@ -1164,7 +1173,7 @@ var sendBulletInfo = function (){
   socket.emit('bulletInfo',data);
 }
 
-socket.on('bulletCollision',function(data) {
+socket.on('bulletCollision',function(data) {//send from server when someone gets hit by bullet
   var bulletID = parseFloat(data.bulletName);
   //console.log("Comparing " + selfID + " to " + data.playerID);
   if (selfID == data.playerID){//current player has been killed

@@ -324,7 +324,7 @@ var bulletThresholdDistance = 50;
       SOCKET_LIST[s].emit('bulletCollision', {bulletName:data.bulletID,playerID:data.killedID,killerID:data.killerID});
     }
 
-    //removeBulletFromServer(data.bulletID);
+    removeBulletFromServer(data.bulletID);
     //first kill player hit
   });
 
