@@ -43,7 +43,7 @@ var velocityUp = 0;
 var gravSpeed = 0.01;
 var jumpSpeed = 0.2
 
-var bulletSpeed = 0.3;
+var bulletSpeed = 1;
 
 //These variables used for movement
 let moveForward = false;
@@ -1155,25 +1155,105 @@ socket.on('gameLoop', function(data){
     selfGun._UpdatePosition(camera.position.x, camera.position.y,  camera.position.z);
   }
 
+  // for (var b = 1; b < bulletID; b++){
+  //   if(BULLET_CAM_LIST[b + selfID]){
+  //     BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
+  //     BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
+  //     BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
+  //     BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
+  //
+  //   }
+  // }
+  // checkCollisionAllBullets();
+  //
+  // for (var b = 1; b < bulletID; b++){
+  //   if(BULLET_CAM_LIST[b + selfID]){
+  //     BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
+  //     BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
+  //     BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
+  //     BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
+  //
+  //   }
+  // }
+  // checkCollisionAllBullets();
+  //
+  // for (var b = 1; b < bulletID; b++){
+  //   if(BULLET_CAM_LIST[b + selfID]){
+  //     BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
+  //     BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
+  //     BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
+  //     BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
+  //
+  //   }
+  // }
+  // checkCollisionAllBullets();
+  //
+  // for (var b = 1; b < bulletID; b++){
+  //   if(BULLET_CAM_LIST[b + selfID]){
+  //     BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
+  //     BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
+  //     BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
+  //     BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
+  //
+  //   }
+  // }
+  // checkCollisionAllBullets();
+
+  updateBullets();
+  sendPlayerInfo();
+  sendBulletInfo();
+  updateGUI();
+  //update();
+  render();
+
+});
+//---------------End of main drawing loop----------------------//
+
+var updateBullets = function (){
   for (var b = 1; b < bulletID; b++){
     if(BULLET_CAM_LIST[b + selfID]){
-      BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed);
+      BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
       BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
       BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
       BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
 
     }
   }
-
-  sendPlayerInfo();
-  sendBulletInfo();
   checkCollisionAllBullets();
-  updateGUI();
-  update();
-  render();
 
-});
-//---------------End of main drawing loop----------------------//
+  for (var b = 1; b < bulletID; b++){
+    if(BULLET_CAM_LIST[b + selfID]){
+      BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
+      BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
+      BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
+      BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
+
+    }
+  }
+  checkCollisionAllBullets();
+
+  for (var b = 1; b < bulletID; b++){
+    if(BULLET_CAM_LIST[b + selfID]){
+      BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
+      BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
+      BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
+      BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
+
+    }
+  }
+  checkCollisionAllBullets();
+
+  for (var b = 1; b < bulletID; b++){
+    if(BULLET_CAM_LIST[b + selfID]){
+      BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
+      BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
+      BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
+      BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
+
+    }
+  }
+  checkCollisionAllBullets();
+}
 
 //Send player info to server
 var sendPlayerInfo = function(){
