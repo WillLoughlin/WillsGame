@@ -609,7 +609,7 @@ var blockHeight = 1;
 //------------------Creating Map With Blocks----------------------//
 socket.on('initBlocks', function(blocks){
   for (var i = 0; i < blocks.length; i++){
-    var blockGeometry = new THREE.BoxGeometry(blocks[i].width,blocks[i].height,blocks[i].height);//width,depth,HEIGHT
+    var blockGeometry = new THREE.BoxGeometry(blocks[i].width,blocks[i].depth,blocks[i].height);//width,depth,HEIGHT
 
     // var blockMaterials =
     // [
@@ -620,9 +620,9 @@ socket.on('initBlocks', function(blocks){
     //   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//front side
     //   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//back side
     // ];//each image corresponds to different side
-    var blockMaterials = new THREE.MeshBasicMaterial( {color: 0xA9A9A9} );
+    var blockMaterials = new THREE.MeshBasicMaterial( {color: blocks[i].color} );
 
-    const wireframeGeometry = new THREE.WireframeGeometry(geometry);
+    const wireframeGeometry = new THREE.WireframeGeometry(blockGeometry);
 		const wireframeMaterial = new THREE.LineBasicMaterial({color: 0x000000});
 		const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
 		wireframe.name = 'wireframe';
@@ -808,9 +808,9 @@ var checkCollisionAllBullets = function () {
 
 var checkCollisionBulletBoxesHelper = function (x,y,z,name) {
   for (var i in BLOCK_LIST){
-    if (x >= BLOCK_LIST[i].position.x - (blockWidth/2)  && x <= BLOCK_LIST[i].position.x + (blockWidth/2)  &&
-        y >= BLOCK_LIST[i].position.y - (blockHeight/2) && y <= BLOCK_LIST[i].position.y + (blockHeight/2) &&
-        z >= BLOCK_LIST[i].position.z - (blockWidth/2)  && z <= BLOCK_LIST[i].position.z + (blockWidth/2)) {
+    if (x >= BLOCK_LIST[i].position.x - (BLOCK_LIST[i].geometry.parameters.width/2)  && x <= BLOCK_LIST[i].position.x + (BLOCK_LIST[i].geometry.parameters.width/2)  &&
+        y >= BLOCK_LIST[i].position.y - (BLOCK_LIST[i].geometry.parameters.height/2) && y <= BLOCK_LIST[i].position.y + (BLOCK_LIST[i].geometry.parameters.height/2) &&
+        z >= BLOCK_LIST[i].position.z - (BLOCK_LIST[i].geometry.parameters.depth/2)  && z <= BLOCK_LIST[i].position.z + (BLOCK_LIST[i].geometry.parameters.depth/2)) {
           socket.emit('removeBulletSend',{bulletID:name});//collision with block detected
           //makeSphere(x,y,z);
           //console.log("Bullet collision with block");
@@ -1155,49 +1155,6 @@ socket.on('gameLoop', function(data){
     selfGun._UpdatePosition(camera.position.x, camera.position.y,  camera.position.z);
   }
 
-  // for (var b = 1; b < bulletID; b++){
-  //   if(BULLET_CAM_LIST[b + selfID]){
-  //     BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
-  //     BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
-  //     BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
-  //     BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
-  //
-  //   }
-  // }
-  // checkCollisionAllBullets();
-  //
-  // for (var b = 1; b < bulletID; b++){
-  //   if(BULLET_CAM_LIST[b + selfID]){
-  //     BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
-  //     BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
-  //     BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
-  //     BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
-  //
-  //   }
-  // }
-  // checkCollisionAllBullets();
-  //
-  // for (var b = 1; b < bulletID; b++){
-  //   if(BULLET_CAM_LIST[b + selfID]){
-  //     BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
-  //     BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
-  //     BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
-  //     BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
-  //
-  //   }
-  // }
-  // checkCollisionAllBullets();
-  //
-  // for (var b = 1; b < bulletID; b++){
-  //   if(BULLET_CAM_LIST[b + selfID]){
-  //     BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
-  //     BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
-  //     BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
-  //     BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
-  //
-  //   }
-  // }
-  // checkCollisionAllBullets();
 
   updateBullets();
   sendPlayerInfo();
@@ -1345,15 +1302,19 @@ var checkCollisionPlayerSideBlocks = function(){
   var playerZ = camera.position.z;
 
   for (var i = 0; i < numBlocks; i++){
-    var topBound = BLOCK_LIST[i].position.y + 0.5;
-    var bottomBound = topBound - 1;
+    var curBlockWidth = BLOCK_LIST[i].geometry.parameters.width;
+    var curBlockHeight = BLOCK_LIST[i].geometry.parameters.height;
+    var curBlockDepth = BLOCK_LIST[i].geometry.parameters.depth;
+
+    var topBound = BLOCK_LIST[i].position.y + (curBlockHeight/2);
+    var bottomBound = topBound - curBlockHeight;
 
     if ((playerY <= topBound && playerY > bottomBound) || (playerY -2  <= topBound && playerY - 2 > bottomBound) || (BLOCK_LIST[i].position.y > playerY -2 && BLOCK_LIST[i].position.y < playerY)) {
       //if (playerY-2 <= topBound && playerY-2 > bottomBound){
-      if (playerX - 0.25 < BLOCK_LIST[i].position.x + 0.5 &&
-       playerX + 0.25 > BLOCK_LIST[i].position.x - 0.5 &&
-       playerZ -0.25 < BLOCK_LIST[i].position.z + 0.5 &&
-       playerZ + 0.25 > BLOCK_LIST[i].position.z - 0.5) {
+      if (playerX - 0.25 < BLOCK_LIST[i].position.x + (curBlockWidth/2) &&
+       playerX + 0.25 > BLOCK_LIST[i].position.x - (curBlockWidth/2) &&
+       playerZ -0.25 < BLOCK_LIST[i].position.z + (curBlockDepth/2) &&
+       playerZ + 0.25 > BLOCK_LIST[i].position.z - (curBlockDepth/2)) {
         return true;
       }
     }
@@ -1364,22 +1325,29 @@ var checkCollisionPlayerSideBlocks = function(){
 var checkCollisionPlayerTopBlocks = function(playerX,playerY,playerZ) {
 
   for (var i = 0; i < numBlocks; i++){
-    var topBound = BLOCK_LIST[i].position.y + 0.5;
-    var bottomBound = topBound - 1;
-    var rightBound = BLOCK_LIST[i].position.x + 0.5;
-    var leftBound = rightBound - 1;
-    var forwardBound = BLOCK_LIST[i].position.z + 0.5;
-    var backBound = forwardBound - 1;
+    var curBlockWidth = BLOCK_LIST[i].geometry.parameters.width;
+    var curBlockHeight = BLOCK_LIST[i].geometry.parameters.height;
+    var curBlockDepth = BLOCK_LIST[i].geometry.parameters.depth;
+
+    //console.log("Width: " + curBlockWidth + " Height: " + curBlockHeight + " Depth: " + curBlockDepth);
+
+    // var topBound = BLOCK_LIST[i].position.y + 0.5;
+    var topBound = BLOCK_LIST[i].position.y + (curBlockHeight/2);
+    var bottomBound = topBound - (curBlockHeight);
+    var rightBound = BLOCK_LIST[i].position.x + (curBlockWidth/2);
+    var leftBound = rightBound - curBlockWidth;
+    var forwardBound = BLOCK_LIST[i].position.z + (curBlockDepth/2);
+    var backBound = forwardBound - curBlockDepth;
 
     if (playerY <= topBound && playerY > bottomBound && playerZ < forwardBound && playerZ > backBound && playerX < rightBound && playerX > leftBound){
       return true;//top of player hit block
     }
 
     if (playerY-2 <= topBound && playerY-2 > bottomBound){
-      if (playerX - 0.25 < BLOCK_LIST[i].position.x + 0.5 &&
-        playerX + 0.25 > BLOCK_LIST[i].position.x - 0.5 &&
-        playerZ -0.25 < BLOCK_LIST[i].position.z + 0.5 &&
-        playerZ + 0.25 > BLOCK_LIST[i].position.z - 0.5) {
+      if (playerX - 0.25 < BLOCK_LIST[i].position.x + (curBlockWidth/2) &&
+        playerX + 0.25 > BLOCK_LIST[i].position.x - (curBlockWidth/2) &&
+        playerZ -0.25 < BLOCK_LIST[i].position.z + (curBlockDepth/2) &&
+        playerZ + 0.25 > BLOCK_LIST[i].position.z - (curBlockDepth/2)) {
           canJump = true;
           return true;//bottom of player hit top of block
         }

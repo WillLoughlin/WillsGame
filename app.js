@@ -106,13 +106,15 @@ This is the Block object
 It is used to create the blocks that make up the map
 It inherits x,y,x,id,type from Thing object
 */
-function Block(id, x, y, z, type, width, height, imgSides, imgTop, imgBottom){
+function Block(id, x, y, z, type, width, depth, height, imgSides, imgTop, imgBottom, color){
   Thing.call(this, id, x, y, z, type);//inheriting from thing
   this.width = width;
   this.height = height;
+  this.depth = depth;
   this.imgSides = imgSides;
   this.imgTop = imgTop;
   this.imgBottom = imgBottom;
+  this.color = color;
 }
 
 //This code allows Block to use member functions of Thing object
@@ -152,9 +154,96 @@ Object.defineProperty(Bullet.prototype, 'constructor', {
 
 
 //should be -4 and 5
+
+
+//making floor
 var counter = 1;
-for (var i = -4; i < 5; i++){
-  for(var j = -4; j < 5; j++){
+var floorColor = 0xaf7f2e;
+var floor = new Block(counter,0,0,0,"Block", 100, 1, 100, "client/img/wood2.jpeg", "client/img/hardwood_floor.jpg", "client/img/wood2.jpeg",floorColor);
+BLOCK_LIST[counter] = floor;
+
+//x,y,z
+counter++;
+var towerColor = 0x424141;
+var tower = new Block(counter,-5,15.5,-5,"Block",6,25,6,"","","",towerColor);
+BLOCK_LIST[counter] = tower;
+
+
+//------Boundary Walls-----//
+counter++;
+var wallColor = 0x9fa0a0;
+var leftWall = new Block(counter,-50,2.5, 0,"Block",0.25,4,100,"","","",wallColor);
+BLOCK_LIST[counter] = leftWall;
+
+counter++;
+var rightWall = new Block(counter,50,2.5, 0,"Block",0.25,4,100,"","","",wallColor);
+BLOCK_LIST[counter] = rightWall;
+
+counter++;
+var frontWall = new Block(counter,0,2.5,-50,"Block",100,4,0.25,"","","",wallColor);
+BLOCK_LIST[counter] = frontWall;
+
+counter++;
+var backWall = new Block(counter,0,2.5,50,"Block",100,4,0.25,"","","",wallColor);
+BLOCK_LIST[counter] = backWall;
+
+
+//--------Back Right Pipe--------//
+counter++;
+var pipeColor = 0xae9f9f;
+var pipeBR1 = new Block(counter,34,1,30,"Block",3,1,1,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBR1;
+
+counter++;
+var pipeBR2 = new Block(counter,34,2,29,"Block",3,1,1,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBR2;
+
+counter++;
+var pipeBR3 = new Block(counter,34,3,28,"Block",3,1,1,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBR3;
+
+counter++;
+var pipeBR4 = new Block(counter,34,4,27,"Block",3,1,1,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBR4;
+
+counter++;
+var pipeBR5 = new Block(counter,34,5,26,"Block",3,1,1,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBR5;
+
+counter++;
+var pipeBRMain = new Block(counter,34,5,0.5,"Block",3,1,50,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBRMain;
+
+counter++;
+var pipeBRTurn = new Block(counter,42.5,5,-23,"Block",14,1,3,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBRTurn;
+
+counter++;
+var pipeBREnd = new Block(counter,48,5,-37,"Block",3,1,25,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBREnd;
+
+counter++;
+var pipeBR6 = new Block(counter,46,4,-48,"Block",1,1,3,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBR6;
+
+counter++;
+var pipeBR7 = new Block(counter,45,3,-48,"Block",1,1,3,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBR7;
+
+counter++;
+var pipeBR8 = new Block(counter,44,2,-48,"Block",1,1,3,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBR8;
+
+counter++;
+var pipeBR9 = new Block(counter,43,1,-48,"Block",1,1,3,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBR9;
+
+
+
+/*
+var counter = 1;
+for (var i = -30; i < 30; i++){
+  for(var j = -30; j < 30; j++){
     var block = new Block(counter,i,0,j,"Block", 1, 1, "client/img/wood2.jpeg", "client/img/hardwood_floor.jpg", "client/img/wood2.jpeg");
     BLOCK_LIST[counter] = block;
     counter++;
@@ -178,6 +267,14 @@ counter++;
 BLOCK_LIST[counter] = new Block(counter, 3, 4, 0, "Block",1,1,"client/img/bricks1.jpg", "client/img/4.jpg", "client/img/bricks1.jpg");
 counter++;
 BLOCK_LIST[counter] = new Block(counter, 4, 5, 0, "Block",1,1,"client/img/bricks1.jpg", "client/img/4.jpg", "client/img/bricks1.jpg");
+
+*/
+
+
+
+
+
+
 
 
 //Socket.io used for multiplayer functionality
@@ -224,11 +321,13 @@ io.sockets.on('connection', function(socket){//called when player connects with 
       y:block.y,
       z:block.z,
       height:block.height,
+      depth:block.depth,
       width:block.width,
       imgSides:block.imgSides,
       imgTop:block.imgTop,
       imgBottom:block.imgBottom,
-      type:block.type
+      type:block.type,
+      color:block.color
     });
   }
   SOCKET_LIST[socket.id].emit('initBlocks',blockPack);//sending block infmormation to new player
