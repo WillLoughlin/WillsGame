@@ -604,10 +604,13 @@ socket.on('initPlayers', function(players){
 
 
 var numBlocks = 0;
+var blockWidth = 1;
+var blockHeight = 1;
 //------------------Creating Map With Blocks----------------------//
 socket.on('initBlocks', function(blocks){
   for (var i = 0; i < blocks.length; i++){
     var blockGeometry = new THREE.BoxGeometry(blocks[i].width,blocks[i].height,blocks[i].height);//width,depth,HEIGHT
+
     // var blockMaterials =
     // [
     //   new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load(blocks[i].imgSides),side: THREE.DoubleSide}),//right side
@@ -794,13 +797,41 @@ window.onmousedown = clickFunction;
 var checkCollisionAllBullets = function () {
   for (var i in BULLET_MODEL_LIST){
     //BULLET_MODEL_LIST[i].name
-    var collisionCheck = checkCollisionBulletPlayersHelper(BULLET_MODEL_LIST[i].position.x,BULLET_MODEL_LIST[i].position.y,BULLET_MODEL_LIST[i].position.z,i);
+    var collisionCheckPlayer = checkCollisionBulletPlayersHelper(BULLET_MODEL_LIST[i].position.x,BULLET_MODEL_LIST[i].position.y,BULLET_MODEL_LIST[i].position.z,i);
+    checkCollisionBulletBoxesHelper(BULLET_MODEL_LIST[i].position.x,BULLET_MODEL_LIST[i].position.y,BULLET_MODEL_LIST[i].position.z,i);
     // if (collisionCheck != -1){
     //   //socket.emit('playerShot',{playerID:collisionCheck,bulletID:i.name});
     //   console.log("Bullet " + BULLET_MODEL_LIST[i].name + " hit player " + collisionCheck);
     // }
   }
+}
 
+var checkCollisionBulletBoxesHelper = function (x,y,z,name) {
+  for (var i in BLOCK_LIST){
+    if (x >= BLOCK_LIST[i].position.x - (blockWidth/2)  && x <= BLOCK_LIST[i].position.x + (blockWidth/2)  &&
+        y >= BLOCK_LIST[i].position.y - (blockHeight/2) && y <= BLOCK_LIST[i].position.y + (blockHeight/2) &&
+        z >= BLOCK_LIST[i].position.z - (blockWidth/2)  && z <= BLOCK_LIST[i].position.z + (blockWidth/2)) {
+          socket.emit('removeBulletSend',{bulletID:name});//collision with block detected
+          //makeSphere(x,y,z);
+          //console.log("Bullet collision with block");
+        }
+  }
+  // (point.x >= box.minX && point.x <= box.maxX) &&
+  // (point.y >= box.minY && point.y <= box.maxY) &&
+  // (point.z >= box.minZ && point.z <= box.maxZ);
+}
+
+//This function creates a sphere at x,y,z, used in testing bullet collision
+var makeSphere = function (x,y,z) {
+  const redSphereGeom = new THREE.SphereGeometry( bulletWidth, 10, 10 );
+  const redSphereMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+  const sphere = new THREE.Mesh( redSphereGeom, redSphereMaterial );
+  scene.add( sphere );
+  sphere.position.x = x;
+  sphere.position.y = y;
+  sphere.position.z = z;
+  //sphere.name = "" + bulletID;
+  //sphere.name = String(bulletID + selfID);
 }
 
 var playerDist;

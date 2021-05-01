@@ -357,7 +357,7 @@ var bulletThresholdDistance = 50;
   // });
 });
 
-/*
+/*//This is old code from when the collision detection was handled by the server, very laggy had to move to browser side
 var playerDist;
 
 var checkCollisionBulletPlayers = function (x,y,z,name,selfID){
