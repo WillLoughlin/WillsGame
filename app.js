@@ -162,11 +162,6 @@ var floorColor = 0xaf7f2e;
 var floor = new Block(counter,0,0,0,"Block", 100, 1, 100, "client/img/wood2.jpeg", "client/img/hardwood_floor.jpg", "client/img/wood2.jpeg",floorColor);
 BLOCK_LIST[counter] = floor;
 
-//x,y,z
-counter++;
-var towerColor = 0x424141;
-var tower = new Block(counter,-5,15.5,-5,"Block",6,25,6,"","","",towerColor);
-BLOCK_LIST[counter] = tower;
 
 
 //------Boundary Walls-----//
@@ -237,6 +232,154 @@ BLOCK_LIST[counter] = pipeBR8;
 counter++;
 var pipeBR9 = new Block(counter,43,1,-48,"Block",1,1,3,"","","",pipeColor);
 BLOCK_LIST[counter] = pipeBR9;
+
+//var tower = new Block(counter,-5,15.5,-5,"Block",6,25,6,"","","",towerColor);
+
+counter++;
+var pipeBR10 = new Block(counter,32,6,5,"Block",1,1,3,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBR10;
+
+counter++;
+var pipeBR11 = new Block(counter,31,7,5,"Block",1,1,3,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBR11;
+
+counter++;
+var pipeBRConnect = new Block(counter,14.5,8,5,"Block",32,1,3,"","","",pipeColor);
+BLOCK_LIST[counter] = pipeBRConnect;
+//------End Pipe BR-------------//
+
+//------Big Box BR---------//
+counter++;
+var bigBoxBRColor = 0x4d7f4f;
+var bigBoxBR = new Block(counter,18,3,22,"Block",10,6,10,"","","",bigBoxBRColor);
+BLOCK_LIST[counter] = bigBoxBR;
+
+//------Center Tower----------//
+//x,y,z
+counter++;
+var towerColor = 0x424141;
+var tower = new Block(counter,-5,15.5,0,"Block",6,30,6,"","","",towerColor);
+BLOCK_LIST[counter] = tower;
+
+counter++;
+var towerSide = new Block(counter,20,5,0,"Block",6,12,4,"","","",towerColor);
+BLOCK_LIST[counter] = towerSide;
+
+var towerFloorColor = 0x939291;
+counter++;
+var towerPlatform1 = new Block(counter,-3,8.75,-3,"Block",16,0.5,19,"","","",towerFloorColor);
+BLOCK_LIST[counter] = towerPlatform1;
+
+counter++;
+var towerPlatform2 = new Block(counter,1.5,15,-8,"Block",7,0.5,10,"","","",towerFloorColor);
+BLOCK_LIST[counter] = towerPlatform2;
+
+counter++;
+var towerPlatform3 = new Block(counter,-5,15,-5.5,"Block",6,0.5,5,"","","",towerFloorColor);
+BLOCK_LIST[counter] = towerPlatform3;
+
+//------Middle Pipe----------//
+
+counter++;
+var middlePipe1 = new Block(counter,-4, 14,-10,"Block",1,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe1;
+
+counter++;
+var middlePipe2 = new Block(counter,-5, 13,-10,"Block",1,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe2;
+
+counter++;
+var middlePipe3 = new Block(counter,-6, 12,-10,"Block",1,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe3;
+
+counter++;
+var middlePipe4 = new Block(counter,-7, 11,-10,"Block",1,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe4;
+
+counter++;
+var middlePipe5 = new Block(counter,-9.5, 10,-10,"Block",4,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe5;
+
+counter++;
+var middlePipe6 = new Block(counter,-12, 9,-10,"Block",1,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe6;
+
+counter++;
+var middlePipe7 = new Block(counter,-13, 8,-10,"Block",1,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe7;
+
+counter++;
+var middlePipe8 = new Block(counter,-14, 7,-10,"Block",1,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe8;
+
+counter++;
+var middlePipe9 = new Block(counter,-15, 6,-10,"Block",1,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe9;
+
+counter++;
+var middlePipe10 = new Block(counter,-16, 5,-10,"Block",1,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe10;
+
+counter++;
+var middlePipe11 = new Block(counter,-17, 4,-10,"Block",1,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe11;
+
+counter++;
+var middlePipe12 = new Block(counter,-18, 3,-10,"Block",1,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe12;
+
+counter++;
+var middlePipe13 = new Block(counter,-19, 2,-10,"Block",1,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe13;
+
+counter++;
+var middlePipe14 = new Block(counter,-20, 1,-10,"Block",1,1,2,"","","",pipeColor);
+BLOCK_LIST[counter] = middlePipe14;
+
+//------Front right building----------//
+counter++;
+var buildingFLColor = 0x555656;
+var buildingFL1 = new Block(counter,40, 6,-40,"Block",6,12,6,"","","", buildingFLColor);
+BLOCK_LIST[counter] = buildingFL1;
+
+counter++;
+var buildingFL2 = new Block(counter,36, 3,-32,"Block",14,6,10,"","","", buildingFLColor);
+BLOCK_LIST[counter] = buildingFL2;
+
+//-----right side boxes-------//
+
+counter++;
+var rightBoxColor = 0xa89784;
+var rightBox1 = new Block(counter,43, 2,-15,"Block",4,4,4,"","","", rightBoxColor);
+BLOCK_LIST[counter] = rightBox1;
+
+counter++;
+var rightBox2 = new Block(counter,43, 2,0,"Block",4,4,4,"","","", rightBoxColor);
+BLOCK_LIST[counter] = rightBox2;
+
+counter++;
+var rightBox3 = new Block(counter,43, 2,15,"Block",4,4,4,"","","", rightBoxColor);
+BLOCK_LIST[counter] = rightBox3;
+
+//blue container
+
+var bContainerColor = 0x565482;
+counter++;
+var bContainer = new Block(counter,5, 2.5,-44,"Block",15,4,4,"","","", bContainerColor);
+BLOCK_LIST[counter] = bContainer;
+
+counter++;
+var bContainer2 = new Block(counter,5, 4.25,-48,"Block",15,0.5,4,"","","", bContainerColor);
+BLOCK_LIST[counter] = bContainer2;
+
+counter++;
+var coverBContainer = new Block(counter,20, 2,-40,"Block",2,3,2,"","","", rightBoxColor);
+BLOCK_LIST[counter] = coverBContainer;
+
+counter++;
+var coverBContainer2 = new Block(counter,25, 2,-38,"Block",2,3,2,"","","", rightBoxColor);
+BLOCK_LIST[counter] = coverBContainer2;
+
 
 
 
