@@ -265,6 +265,10 @@ counter++;
 var towerSide = new Block(counter,20,5,0,"Block",6,12,4,"","","",towerColor);
 BLOCK_LIST[counter] = towerSide;
 
+counter++;
+var towerConnect = new Block(counter,7,1.25,-1.5,"Block",20,1.5,1,"","","",towerColor);
+BLOCK_LIST[counter] = towerConnect;
+
 var towerFloorColor = 0x939291;
 counter++;
 var towerPlatform1 = new Block(counter,-3,8.75,-3,"Block",16,0.5,19,"","","",towerFloorColor);
@@ -380,6 +384,19 @@ counter++;
 var coverBContainer2 = new Block(counter,25, 2,-38,"Block",2,3,2,"","","", rightBoxColor);
 BLOCK_LIST[counter] = coverBContainer2;
 
+//red container
+var rContainerColor = 0xdb4e42;
+counter++;
+var rContainer = new Block(counter,5, 2.5, 48,"Block",15,4,4,"","","", rContainerColor);
+BLOCK_LIST[counter] = rContainer;
+
+counter++;
+var rContainer2 = new Block(counter,5, 4.25,44,"Block",15,0.5,4,"","","", rContainerColor);
+BLOCK_LIST[counter] = rContainer2;
+
+counter++;
+var rContainer3 = new Block(counter,5, 2.5, 41.75,"Block",15,4,0.5,"","","", rContainerColor);
+BLOCK_LIST[counter] = rContainer3;
 
 
 
