@@ -399,6 +399,85 @@ var rContainer3 = new Block(counter,5, 2.5, 41.75,"Block",15,4,0.5,"","","", rCo
 BLOCK_LIST[counter] = rContainer3;
 
 
+counter++;
+var rContainer4 = new Block(counter,-4, 1.5, 41.75,"Block",3,2,0.5,"","","", rContainerColor);
+BLOCK_LIST[counter] = rContainer4;
+
+//oil container back left
+var containerBLColor = 0xdbdbdb;
+counter++;
+var containerBL = new Block(counter,-20, 2, 41.75,"Block",12,4,3,"","","", containerBLColor);
+BLOCK_LIST[counter] = containerBL;
+
+//building BL
+
+var buildingBLColor = 0xc8b125;
+counter++;
+var buildingBL = new Block(counter,-40, 2, 35,"Block",12,10,18,"","","", buildingBLColor);
+BLOCK_LIST[counter] = buildingBL;
+
+//left middle building
+var buildingLMColor = 0xc86a41;
+counter++;
+var buildingLM = new Block(counter,-47.5, 2.5, 10,"Block",5,4,15,"","","", buildingLMColor);
+BLOCK_LIST[counter] = buildingLM;
+
+
+counter++;
+var buildingLM2 = new Block(counter,-43, 4.25, 3,"Block",4,0.5,11,"","","", buildingLMColor);
+BLOCK_LIST[counter] = buildingLM2;
+
+counter++;
+var buildingLM3 = new Block(counter,-47.5, 4.25, 0,"Block",5,0.5,5,"","","", buildingLMColor);
+BLOCK_LIST[counter] = buildingLM3;
+
+counter++;
+var buildingLM4 = new Block(counter,-41.25, 2, 3,"Block",0.5,4,11,"","","", buildingLMColor);
+BLOCK_LIST[counter] = buildingLM4;
+
+counter++;
+var buildingLM5 = new Block(counter,-43.5, 2, -2.25,"Block",5,4,0.5,"","","", buildingLMColor);
+BLOCK_LIST[counter] = buildingLM5;
+
+//left side boxes
+counter++;
+var leftBoxColor = 0xd0bfa1;
+var leftBox1 = new Block(counter,-41.5, 1, -8,"Block",2,2,2,"","","", leftBoxColor);
+BLOCK_LIST[counter] = leftBox1;
+
+counter++;
+var leftBox2 = new Block(counter,-38, 1, -12,"Block",2,2,2,"","","", leftBoxColor);
+BLOCK_LIST[counter] = leftBox2;
+
+counter++;
+var leftBox3 = new Block(counter,-39, 1.25, -38,"Block",2,1.5,2,"","","", leftBoxColor);
+BLOCK_LIST[counter] = leftBox3;
+
+counter++;
+var leftBox4 = new Block(counter,-39, 1.75, -36,"Block",2,2.5,2,"","","", leftBoxColor);
+BLOCK_LIST[counter] = leftBox4;
+
+counter++;
+var leftBox5 = new Block(counter,-15, 1.75, -43,"Block",2,2.5,2,"","","", leftBoxColor);
+BLOCK_LIST[counter] = leftBox5;
+
+counter++;
+var leftBox6 = new Block(counter,-13, 1.25, -43,"Block",2,1.5,2,"","","", leftBoxColor);
+BLOCK_LIST[counter] = leftBox6;
+
+counter++;
+var leftBox7 = new Block(counter,-25, 1.25, -41,"Block",4,1.5,2,"","","", leftBoxColor);
+BLOCK_LIST[counter] = leftBox7;
+
+
+
+
+//front left container
+counter++;
+var containerFLColor = 0xede4e4;
+var containerFL = new Block(counter,-36, 2, -32,"Block",4,4,15,"","","", containerFLColor);
+BLOCK_LIST[counter] = containerFL;
+
 
 /*
 var counter = 1;
