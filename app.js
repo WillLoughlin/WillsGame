@@ -236,17 +236,32 @@ BLOCK_LIST[counter] = pipeBR9;
 //var tower = new Block(counter,-5,15.5,-5,"Block",6,25,6,"","","",towerColor);
 
 counter++;
-var pipeBR10 = new Block(counter,32,6,5,"Block",1,1,3,"","","",pipeColor);
+var pipeBR10 = new Block(counter,32,6,8,"Block",1,1,3,"","","",pipeColor);
 BLOCK_LIST[counter] = pipeBR10;
 
 counter++;
-var pipeBR11 = new Block(counter,31,7,5,"Block",1,1,3,"","","",pipeColor);
+var pipeBR11 = new Block(counter,31,7,8,"Block",1,1,3,"","","",pipeColor);
 BLOCK_LIST[counter] = pipeBR11;
 
 counter++;
-var pipeBRConnect = new Block(counter,14.5,8,5,"Block",32,1,3,"","","",pipeColor);
+var pipeBRConnect = new Block(counter,14.5,8,8,"Block",32,1,3,"","","",pipeColor);
 BLOCK_LIST[counter] = pipeBRConnect;
 //------End Pipe BR-------------//
+
+
+//back tower block
+counter++;
+var blockBT = new Block(counter,-6,4.75,14,"Block",10,8.5,15,"","","",pipeColor);
+BLOCK_LIST[counter] = blockBT;
+
+
+
+counter++;
+var blockLT = new Block(counter,-16.75,2.75,-1.5,"Block",7.5,5,6,"","","",pipeColor);
+BLOCK_LIST[counter] = blockLT;
+
+
+
 
 //------Big Box BR---------//
 counter++;
@@ -265,6 +280,27 @@ counter++;
 var towerSide = new Block(counter,20,5,0,"Block",6,12,4,"","","",towerColor);
 BLOCK_LIST[counter] = towerSide;
 
+
+counter++;
+var towerFront = new Block(counter,-7.5,2.5,-20,"Block",7,5,13,"","","",towerColor);
+BLOCK_LIST[counter] = towerFront;
+
+counter++;
+var towerFront2 = new Block(counter,-7.5,3.875,-13,"Block",7,2.25,1,"","","",towerColor);
+BLOCK_LIST[counter] = towerFront2;
+
+counter++;
+var towerLeftRoom1 = new Block(counter,-15.5,5,4,"Block",10,0.5,5,"","","",towerColor);
+BLOCK_LIST[counter] = towerLeftRoom1;
+
+counter++;
+var towerLeftRoom2 = new Block(counter,-20.25,2.5,4,"Block",0.5,4.5,5,"","","",towerColor);
+BLOCK_LIST[counter] = towerLeftRoom2;
+
+counter++;
+var towerLeftRoom3 = new Block(counter,-9,2.5,6.25,"Block",14,4.5,0.5,"","","",towerColor);
+BLOCK_LIST[counter] = towerLeftRoom3;
+
 counter++;
 var towerConnect = new Block(counter,7,1.25,-1.5,"Block",20,1.5,1,"","","",towerColor);
 BLOCK_LIST[counter] = towerConnect;
@@ -281,6 +317,42 @@ BLOCK_LIST[counter] = towerPlatform2;
 counter++;
 var towerPlatform3 = new Block(counter,-5,15,-5.5,"Block",6,0.5,5,"","","",towerFloorColor);
 BLOCK_LIST[counter] = towerPlatform3;
+
+counter++;
+var support1 = new Block(counter,4.01,7.375,-12,"Block",2,14.75,2,"","","",towerColor);
+BLOCK_LIST[counter] = support1;
+
+counter++;
+var support2 = new Block(counter,-6,4.375,-12.25,"Block",10,8.25,0.5,"","","",towerColor);
+BLOCK_LIST[counter] = support2;
+
+counter++;
+var support3 = new Block(counter,-10.75,4.375,-4.5,"Block",0.5,8.25,15,"","","",towerColor);
+BLOCK_LIST[counter] = support3;
+
+counter++;
+var support4 = new Block(counter,-9.25,4.375,0,"Block",2.5,8.25,6,"","","",towerColor);
+BLOCK_LIST[counter] = support4;
+
+counter++;
+var support5 = new Block(counter,-6.5,5.625,4.75,"Block",9,5.75,3.5,"","","",towerColor);
+BLOCK_LIST[counter] = support5;
+
+counter++;
+var support6 = new Block(counter,4.01,7.375,-4,"Block",2,14.75,2,"","","",towerColor);
+BLOCK_LIST[counter] = support6;
+
+counter++;
+var support7 = new Block(counter,1,4.375,0,"Block",6,8.25,6,"","","",towerColor);
+BLOCK_LIST[counter] = support7;
+
+counter++;
+var support8 = new Block(counter,-6,11.875,-5.5,"Block",4,5.75,5,"","","",towerColor);
+BLOCK_LIST[counter] = support8;
+
+
+
+
 
 //------Middle Pipe----------//
 
@@ -313,32 +385,35 @@ var middlePipe7 = new Block(counter,-13, 8,-10,"Block",1,1,2,"","","",pipeColor)
 BLOCK_LIST[counter] = middlePipe7;
 
 counter++;
-var middlePipe8 = new Block(counter,-14, 7,-10,"Block",1,1,2,"","","",pipeColor);
+var middlePipe8 = new Block(counter,-15.5, 7,-10,"Block",4,1,2,"","","",pipeColor);
 BLOCK_LIST[counter] = middlePipe8;
 
+//extend this one
 counter++;
-var middlePipe9 = new Block(counter,-15, 6,-10,"Block",1,1,2,"","","",pipeColor);
+var middlePipe9 = new Block(counter,-18, 6,-10,"Block",1,1,2,"","","",pipeColor);
 BLOCK_LIST[counter] = middlePipe9;
 
 counter++;
-var middlePipe10 = new Block(counter,-16, 5,-10,"Block",1,1,2,"","","",pipeColor);
+var middlePipe10 = new Block(counter,-19, 5,-10,"Block",1,1,2,"","","",pipeColor);
 BLOCK_LIST[counter] = middlePipe10;
 
 counter++;
-var middlePipe11 = new Block(counter,-17, 4,-10,"Block",1,1,2,"","","",pipeColor);
+var middlePipe11 = new Block(counter,-21, 4,-10,"Block",3,1,2,"","","",pipeColor);
 BLOCK_LIST[counter] = middlePipe11;
 
 counter++;
-var middlePipe12 = new Block(counter,-18, 3,-10,"Block",1,1,2,"","","",pipeColor);
+var middlePipe12 = new Block(counter,-23, 3,-10,"Block",1,1,2,"","","",pipeColor);
 BLOCK_LIST[counter] = middlePipe12;
 
 counter++;
-var middlePipe13 = new Block(counter,-19, 2,-10,"Block",1,1,2,"","","",pipeColor);
+var middlePipe13 = new Block(counter,-24, 2,-10,"Block",1,1,2,"","","",pipeColor);
 BLOCK_LIST[counter] = middlePipe13;
 
 counter++;
-var middlePipe14 = new Block(counter,-20, 1,-10,"Block",1,1,2,"","","",pipeColor);
+var middlePipe14 = new Block(counter,-25, 1,-10,"Block",1,1,2,"","","",pipeColor);
 BLOCK_LIST[counter] = middlePipe14;
+
+
 
 //------Front right building----------//
 counter++;
@@ -469,7 +544,30 @@ counter++;
 var leftBox7 = new Block(counter,-25, 1.25, -41,"Block",4,1.5,2,"","","", leftBoxColor);
 BLOCK_LIST[counter] = leftBox7;
 
+counter++;
+var towerCover1 = new Block(counter,-19, 1.25, 18,"Block",5,1.5,0.5,"","","", leftBoxColor);
+BLOCK_LIST[counter] = towerCover1;
 
+counter++;
+var towerCover2 = new Block(counter,-21.25, 1.25, 16.75,"Block",0.5,1.5,2,"","","", leftBoxColor);
+BLOCK_LIST[counter] = towerCover2;
+
+counter++;
+var towerCover3 = new Block(counter,-20.25, 1.25, -13.75,"Block",0.5,1.5,6,"","","", leftBoxColor);
+BLOCK_LIST[counter] = towerCover3;
+
+counter++;
+var towerCover4 = new Block(counter,-17.5, 1.25, -17,"Block",6,1.5,0.5,"","","", leftBoxColor);
+BLOCK_LIST[counter] = towerCover4;
+
+counter++;
+var towerCover5 = new Block(counter,-17.5, 1.25, -14.25,"Block",2,1.5,2,"","","", leftBoxColor);
+BLOCK_LIST[counter] = towerCover5;
+
+counter++;
+var hiddenBottomColor = 0x4a4642;
+var hiddenBottom = new Block(counter,36, 1.25, 48,"Block",4,1.5,4,"","","", hiddenBottomColor);
+BLOCK_LIST[counter] = hiddenBottom;
 
 
 //front left container

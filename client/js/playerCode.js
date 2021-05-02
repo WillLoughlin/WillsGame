@@ -104,9 +104,26 @@ var cube = new THREE.Mesh(geometry,material);//creating cube
 scene.add(cube);//adding cube to 3d scene
 */
 
-camera.position.z = 3;//initialize camera position
+camera.position.z = 5;//initialize camera position
+
 camera.position.y = playerHeight + (playerHeight * 0.5);
 camera.rotation.order = "YXZ";
+
+// var hiddenBottomColor = 0x4a4642;
+// var hiddenBottom = new Block(counter,36, 1.25, 48,"Block",4,1.5,4,"","","", hiddenBottomColor);
+
+const geometryHidden = new THREE.BoxGeometry(4,2.5,4);
+const materialHidden = new THREE.MeshBasicMaterial({color: 0x4a4642});
+var hiddenBox = new THREE.Mesh(geometryHidden,materialHidden);
+hiddenBox.position.x = 36;
+hiddenBox.position.y = 3.25;
+hiddenBox.position.z = 48;
+scene.add(hiddenBox);
+
+const hiddenWireGeom = new THREE.WireframeGeometry(geometryHidden);
+const hiddenWireMat = new THREE.LineBasicMaterial({color: 0x000000});
+const hiddenWire = new THREE.LineSegments(hiddenWireGeom, hiddenWireMat);
+hiddenBox.add(hiddenWire);
 
 //const geometryCylinder = new THREE.CylinderGeometry( 0.5, 0.5, 2, 32 );
 const geometryPlayerBox = new THREE.BoxGeometry(0.5,2,0.5);
