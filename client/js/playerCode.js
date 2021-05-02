@@ -14,6 +14,13 @@ import {FBXLoader} from './FBXLoader.js';//used to load player model
 var WIDTH = 500;
 var HEIGHT = 500;
 
+var name = localStorage.getItem("playerName");
+console.log("Player name: " + name);
+if (name = "" || !name){
+  console.log("player name not found, set to anonymous");
+  name = "anonymous";
+}
+
 //View FOV
 var FOV_degrees = 60;
 
@@ -224,7 +231,7 @@ canvasBL.fillRect(0, 0, canvasBL.canvas.width, canvasBL.canvas.height);
 const textureBL = new THREE.CanvasTexture(canvasBL.canvas);
 const materialBL = new THREE.MeshBasicMaterial({
   map: textureBL,
-  opacity: 1,
+  opacity: 0.8,
   transparent: true,
 });
 const bottomLeftGUI = new THREE.Mesh(bottomLeftGeometry, materialBL);
@@ -296,12 +303,12 @@ scene.add(light);
 
 const loader = new THREE.CubeTextureLoader();
 const texture = loader.load([
-    './client/resources/posx.jpg',
-    './client/resources/negx.jpg',
-    './client/resources/posy.jpg',
-    './client/resources/negy.jpg',
-    './client/resources/posz.jpg',
-    './client/resources/negz.jpg',
+    './resources/posx.jpg',
+    './resources/negx.jpg',
+    './resources/posy.jpg',
+    './resources/negy.jpg',
+    './resources/posz.jpg',
+    './resources/negz.jpg',
 ]);
 
 scene.background = texture;
@@ -352,7 +359,7 @@ class LoadGun {
   _LoadGunModel(){
 
       var loader = new GLTFLoader();
-      loader.load('./client/models/gun.glb', (gltf) => {
+      loader.load('./models/gun.glb', (gltf) => {
         gltf.scene.scale.setScalar(0.2);
         gltf.scene.traverse(c => {
           c.castShadow = true;
@@ -412,7 +419,7 @@ class LoadPlayerModel {
 
   _LoadAnimatedModel() {
     const loader = new FBXLoader();//change emmision in blender to change color of gun
-    loader.load('./client/models/ybot.fbx', (fbx) => {
+    loader.load('./models/ybot.fbx', (fbx) => {
       fbx.scale.setScalar(0.013);
       fbx.traverse(c => {
         c.castShadow = true;
@@ -426,7 +433,7 @@ class LoadPlayerModel {
       fbx.name = this.name;
 
       const anim = new FBXLoader();
-      anim.load('./client/anims/rifle aiming idle.fbx', (anim) => {
+      anim.load('./anims/rifle aiming idle.fbx', (anim) => {
         const m = new THREE.AnimationMixer(fbx);
         this._mixers.push(m);
         const idle = m.clipAction(anim.animations[0]);
