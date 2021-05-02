@@ -33,6 +33,11 @@ var playerBoundingBox = false;
 var kills = 0;
 var deaths = 0;
 
+var magSize = 7;
+var ammo = magSize;
+var reloading = false;
+var reloadTime = 3;
+
 //These get updated from the Server on connection
 var playerSpeed = 0.05;
 var playerHeight = 2;
@@ -141,6 +146,7 @@ const cube = new THREE.Mesh( reticleGeometryTop, reticleMaterial );
 cube.position.x = 0;
 cube.position.y = reticleDist;
 cube.position.z = -1;
+cube.transparent = true;
 //scene.add(cube);
 camera.add(cube);
 
@@ -149,6 +155,8 @@ const cube2 = new THREE.Mesh( reticleGeometrySide, reticleMaterial );
 cube2.position.x = reticleDist;
 cube2.position.y = 0;
 cube2.position.z = -1;
+cube2.transparent = true;
+
 //scene.add(cube);
 camera.add(cube2);
 
@@ -156,6 +164,8 @@ const cube3 = new THREE.Mesh( reticleGeometrySide, reticleMaterial );
 cube3.position.x = -1 * reticleDist;
 cube3.position.y = 0;
 cube3.position.z = -1;
+cube3.transparent = true;
+
 //scene.add(cube);
 camera.add(cube3);
 
@@ -163,16 +173,16 @@ const cube4 = new THREE.Mesh( reticleGeometryTop, reticleMaterial );
 cube4.position.x = 0;
 cube4.position.y = -1 * reticleDist;
 cube4.position.z = -1;
+cube4.material.transparent = true;
 //scene.add(cube);
 camera.add(cube4);
-
 
 //---------------------------Bottom Right GUI--------------------------------//
 
 // var guiDistX = 0.92;
 // var guiDistY = 0.65;
 var guiDistX = 0.46;
-var guiDistY = 0.32;
+var guiDistY = 0.30;
 
 const bottomRightGeometry = new THREE.BoxGeometry( 0.25, 0.25, 0.001);
 //const reticleMaterial = new THREE.MeshBasicMaterial( {color: 0x00FFFF} );
@@ -766,7 +776,14 @@ document.onkeydown  = function ( event ) {//called when keys are pressed
   case 'ShiftLeft':
     sprint = true;
     break;
-	}
+
+
+  case 'KeyR':
+    if (!reloading && ammo != magSize){
+      reload();
+    }
+    break;
+  }
 };
 
 // renderer.addEventListener("mousedown", function (evt) {
@@ -779,6 +796,7 @@ const bulletGeometry = new THREE.SphereGeometry( bulletWidth, 10, 10 );
 const bulletMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 var clickFunction = function() {
   //console.log("Bullet Fired");
+  if (ammo > 0 && !reloading) {
   var bulletCam = new THREE.PerspectiveCamera(FOV_degrees,WIDTH/HEIGHT,0.1,1000);//create another camera similar to playercam
   bulletCam.rotation.copy(camera.rotation);
   bulletCam.position.copy(camera.position);
@@ -805,8 +823,18 @@ var clickFunction = function() {
   });
   socket.emit('newBullet',data);
   bulletID = bulletID + 1;
+  ammo = ammo - 1;
+} else if (!reloading){
+  reload();
+}
 }
 window.onmousedown = clickFunction;
+
+var reloadClock = new THREE.Clock();
+var reload = function(){
+  reloading = true;
+  reloadClock.start();
+}
 
 
 //-------------------Changing bullet collision detection to inside player browser-----------------//
@@ -815,7 +843,9 @@ var checkCollisionAllBullets = function () {
   for (var i in BULLET_MODEL_LIST){
     //BULLET_MODEL_LIST[i].name
     var collisionCheckPlayer = checkCollisionBulletPlayersHelper(BULLET_MODEL_LIST[i].position.x,BULLET_MODEL_LIST[i].position.y,BULLET_MODEL_LIST[i].position.z,i);
-    checkCollisionBulletBoxesHelper(BULLET_MODEL_LIST[i].position.x,BULLET_MODEL_LIST[i].position.y,BULLET_MODEL_LIST[i].position.z,i);
+    if(BULLET_MODEL_LIST[i]){
+      checkCollisionBulletBoxesHelper(BULLET_MODEL_LIST[i].position.x,BULLET_MODEL_LIST[i].position.y,BULLET_MODEL_LIST[i].position.z,i);
+    }
     // if (collisionCheck != -1){
     //   //socket.emit('playerShot',{playerID:collisionCheck,bulletID:i.name});
     //   console.log("Bullet " + BULLET_MODEL_LIST[i].name + " hit player " + collisionCheck);
@@ -833,9 +863,6 @@ var checkCollisionBulletBoxesHelper = function (x,y,z,name) {
           //console.log("Bullet collision with block");
         }
   }
-  // (point.x >= box.minX && point.x <= box.maxX) &&
-  // (point.y >= box.minY && point.y <= box.maxY) &&
-  // (point.z >= box.minZ && point.z <= box.maxZ);
 }
 
 //This function creates a sphere at x,y,z, used in testing bullet collision
@@ -851,9 +878,11 @@ var makeSphere = function (x,y,z) {
   //sphere.name = String(bulletID + selfID);
 }
 
+//clock used to make sure you dont get multiple kills for shooting same person once
 var killClock = new THREE.Clock();
 var lastKilled = 0;
 var timeChange = 0;
+var killCheckTime = 2;//how long you have to wait to kill somebody again
 
 var playerDist;
 var checkCollisionBulletPlayersHelper = function (x,y,z,name){
@@ -872,7 +901,7 @@ var checkCollisionBulletPlayersHelper = function (x,y,z,name){
         var shot = closeCheckBulletPlayer(x,y,z,i);
         if (shot){
           timeChange = killClock.getDelta();
-          if ((i == lastKilled && timeChange > 2) || i != lastKilled){
+          if ((i == lastKilled && timeChange > killCheckTime) || i != lastKilled){
             socket.emit('playerShot', {bulletID:name,killedID:i,killerID:selfID});
             removeSelfBullet(name);
             lastKilled = i;
@@ -1051,16 +1080,6 @@ var vecZ = new THREE.Vector3();
 
 var selfDirection;
 
-//var timerCounter = 0;
-//var amountTime = 0.0;
-//var clock = new THREE.Clock();
-// var clock2 = new THREE.Clock();
-// clock2.start();
-
-//var cycleCounter = 0;
-
-//clock.start();
-
 socket.on('gameLoop', function(data){
 
 
@@ -1208,6 +1227,7 @@ socket.on('gameLoop', function(data){
   sendPlayerInfo();
   sendBulletInfo();
   updateGUI();
+  checkReload();
   //update();
   render();
 
@@ -1216,49 +1236,17 @@ socket.on('gameLoop', function(data){
 
 var updateBullets = function (){
   updateBulletsHelper(20);
-  // for (var b = 1; b < bulletID; b++){
-  //   if(BULLET_CAM_LIST[b + selfID]){
-  //     BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
-  //     BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
-  //     BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
-  //     BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
-  //
-  //   }
-  // }
-  // checkCollisionAllBullets();
-  //
-  // for (var b = 1; b < bulletID; b++){
-  //   if(BULLET_CAM_LIST[b + selfID]){
-  //     BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
-  //     BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
-  //     BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
-  //     BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
-  //
-  //   }
-  // }
-  // checkCollisionAllBullets();
-  //
-  // for (var b = 1; b < bulletID; b++){
-  //   if(BULLET_CAM_LIST[b + selfID]){
-  //     BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
-  //     BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
-  //     BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
-  //     BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
-  //
-  //   }
-  // }
-  // checkCollisionAllBullets();
-  //
-  // for (var b = 1; b < bulletID; b++){
-  //   if(BULLET_CAM_LIST[b + selfID]){
-  //     BULLET_CAM_LIST[b + selfID].translateZ(-1 * bulletSpeed * .25);
-  //     BULLET_MODEL_LIST[b + selfID].position.x = BULLET_CAM_LIST[b + selfID].position.x;
-  //     BULLET_MODEL_LIST[b + selfID].position.y = BULLET_CAM_LIST[b + selfID].position.y;
-  //     BULLET_MODEL_LIST[b + selfID].position.z = BULLET_CAM_LIST[b + selfID].position.z;
-  //
-  //   }
-  // }
-  // checkCollisionAllBullets();
+}
+
+var checkReload = function(){
+  if (reloading){
+    var curTime = reloadClock.getElapsedTime();
+    if (curTime > 3){
+      reloading = false;
+      reloadClock.stop();
+      ammo = magSize;
+    }
+  }
 }
 
 var updateBulletsHelper = function(split){
@@ -1340,10 +1328,7 @@ socket.on('bulletCollision',function(data) {//send from server when someone gets
   //console.log("Comparing " + selfID + " to " + data.playerID);
   if (selfID == data.playerID){//current player has been killed
     //console.log("Killed by player: " + data.killerID);
-    camera.position.y = 50;
-    camera.position.x = 0;
-    camera.position.z = 0;
-    deaths = deaths + 1;
+    selfKilled(data.killerID);
   }
   if (selfID == data.killerID){
     //console.log("Killed player: " + data.playerID);
@@ -1351,6 +1336,21 @@ socket.on('bulletCollision',function(data) {//send from server when someone gets
   }
 
 });
+
+var selfKilled = function(killerID){
+  respawn();
+  deaths = deaths + 1;
+}
+
+var respawn = function(){
+  var randX = (Math.random() * 80) - 40;
+  var randZ = (Math.random() * 80) - 40;
+  camera.position.y = 80;
+  camera.position.x = randX;
+  camera.position.z = randZ;
+}
+
+respawn();
 
 //game logic
 var update = function(){
@@ -1430,22 +1430,6 @@ var distanceTwoPoints = function(x1,y1,z1,x2,y2,z2){
 //draw scene
 var render = function() {
   renderer.render(scene,camera);
-  //renderer.autoClear = false;
-
-  //hudTexture.needsUpdate = true;
-  //render hud
-  //hudBitmap.clearRect(0, 0, WIDTH, HEIGHT);
-  //hudBitmap.font = "Normal 40px Arial";
-  //hudBitmap.textAlign = 'center';
-  //hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
-  //hudBitmap.fillText('Test', WIDTH / 2, HEIGHT / 2);
-
-  // hudBitmap.fillText("test",WIDTH/2,HEIGHT/2);
-  //hudBitmap.fillText('test', WIDTH / 2, HEIGHT / 2);
-
-
-  //renderer.render(sceneHUD, cameraHUD);
-
 };
 
 
@@ -1456,11 +1440,47 @@ canvasBL.fillStyle = '#000';
 canvasBL.font = "30px Georgia";
 
 var updateGUI = function(){
+  //bottom left GUI here
   canvasBL.clearRect(0,0,canvasBL.canvas.width, canvasBL.canvas.height);
+  canvasBL.fillStyle = '#ffffff';
+  canvasBL.fillRect(0, 0, canvasBL.canvas.width, canvasBL.canvas.height);
+  canvasBL.fillStyle = '#000';
   var textBL = "Kills: " + kills;
   canvasBL.fillText(textBL, 48, 25);
   var textBL2 = "Deaths: " + deaths;
   canvasBL.fillText(textBL2,15,60);
   bottomLeftGUI.material.map.needsUpdate = true;
 
+  //bottom right gui here
+  canvasBR.clearRect(0,0,canvasBR.canvas.width, canvasBR.canvas.height);
+  canvasBR.fillStyle = '#ffffff';
+  canvasBR.fillRect(0, 0, canvasBR.canvas.width, canvasBR.canvas.height);
+  var infHexCode = 0x221E; //or &#8734;
+  canvasBR.fillStyle = '#000';
+  var textBR = "Ammo: " + ammo + " / " + String.fromCharCode(infHexCode);
+  canvasBR.fillText(textBR, 10, 30);
+
+
+   // var c= 169; // 0xA9
+   // context.fillText(String.fromCharCode(c), 100, 100);
+   cube.material.opacity = 1;
+   cube2.material.opacity = 1;
+   cube3.material.opacity = 1;
+   cube4.material.opacity = 1;
+
+
+  if (reloading){
+    canvasBR.fillText("RELOADING ",10, 60);
+    canvasBR.fillRect(10,70,180,20);
+    canvasBR.fillStyle = '#00c402';
+    var percent = reloadClock.getElapsedTime() / reloadTime;
+    var distFill = percent * 170;
+    canvasBR.fillRect(15,75,distFill,10);
+    cube.material.opacity = 0.1;
+    cube2.material.opacity = 0.1;
+    cube3.material.opacity = 0.1;
+    cube4.material.opacity = 0.1;
+    //canvasBR.fillText(reloadClock.getElapsedTime() + " / " + reloadTime, 10, 80);
+  }
+  bottomRightGUI.material.map.needsUpdate = true;
 }
