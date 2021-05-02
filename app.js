@@ -36,33 +36,6 @@ var playerSpeed = 0.10;
 var playerHeight = 2;
 
 
-
-// var blockWidth = 100;
-// var blockHeight = 100;
-// var numBlocks = 0;
-// var numPoints = 0;//3d
-
-//var direction = new THREE.Vector3();//used to save player x,z
-
-/*
-var Player = function(id){
-  var self = {
-    x:0,
-    y:0,
-    z:0,
-    id:id,
-    name:"Will",
-    cameraX:0,
-    cameraY:0,
-    pressingRight:false,
-    pressingLeft:false,
-    pressingUp:false,
-    pressingDown:false
-  }
-  return self;
-}
-*///old player object
-
 /*
 This is the Thing Object
 All other objects in the game inherit position, id, and type variables from the thing object
@@ -126,13 +99,14 @@ Object.defineProperty(Block.prototype, 'constructor', {
 });
 
 
-//bullet object
+//Bullet object
 function Bullet(idSelf,idOwner, x,y,z,type){
   Thing.call(this,idSelf,x,y,z,type);
   this.idSelf = idSelf;
   this.idOwner = idOwner;
 }
 
+//Again allowing the bullet object to use member functions of thing object
 Bullet.prototype = Object.create(Thing.prototype);
 Object.defineProperty(Bullet.prototype, 'constructor', {
   value: Bullet,
@@ -141,28 +115,27 @@ Object.defineProperty(Bullet.prototype, 'constructor', {
 });
 
 
-//Creating Map
-//var block1 = new Block(1,1,0,1,"Block", 1, 1, "client/img/1.jpg", "client/img/1.jpg", "client/img/1.jpg");
-//BLOCK_LIST[1] = block1;
 
-//var block2 = new Block(2,2,0,2,"Block", 1, 1, "client/img/1.jpg", "client/img/1.jpg", "client/img/1.jpg");
-//BLOCK_LIST[2] = block2;
+/*
+The Map is create here and sent to each player on connection.
+Each block is hard coded with an x,y,z,width,height, and depth.
+There are 90 blocks total in the map, and it is loosely based on
+the Rust map from Call of Duty Modern Warfare.
 
-// var block1 = new Block(1,1,0,1,"Block",10,10,"client/img/wood2.jpeg", "client/img/hardwood_floor.jpg", "client/img/wood2.jpeg");
-//BLOCK_LIST[1] = block1;
-//id, x, y, z, type, width, height, imgSides, imgTop, imgBottom){
+Image textures on many blocks puts a lot of strain on the renderer,
+so each block is colored with a single color defined by the hexadecimal
+color codes.
 
-
-//should be -4 and 5
-
+There is an option to send images to players which is why there are strings
+in the constructor, but this map does not take advantage of this option to
+increase the performance of the game.
+*/
 
 //making floor
 var counter = 1;
 var floorColor = 0xaf7f2e;
-var floor = new Block(counter,0,0,0,"Block", 100, 1, 100, "client/img/wood2.jpeg", "client/img/hardwood_floor.jpg", "client/img/wood2.jpeg",floorColor);
+var floor = new Block(counter,0,0,0,"Block", 100, 1, 100, "", "", "",floorColor);
 BLOCK_LIST[counter] = floor;
-
-
 
 //------Boundary Walls-----//
 counter++;
@@ -233,8 +206,6 @@ counter++;
 var pipeBR9 = new Block(counter,43,1,-48,"Block",1,1,3,"","","",pipeColor);
 BLOCK_LIST[counter] = pipeBR9;
 
-//var tower = new Block(counter,-5,15.5,-5,"Block",6,25,6,"","","",towerColor);
-
 counter++;
 var pipeBR10 = new Block(counter,32,6,8,"Block",1,1,3,"","","",pipeColor);
 BLOCK_LIST[counter] = pipeBR10;
@@ -248,20 +219,14 @@ var pipeBRConnect = new Block(counter,14.5,8,8,"Block",32,1,3,"","","",pipeColor
 BLOCK_LIST[counter] = pipeBRConnect;
 //------End Pipe BR-------------//
 
-
 //back tower block
 counter++;
 var blockBT = new Block(counter,-6,4.75,14,"Block",10,8.5,15,"","","",pipeColor);
 BLOCK_LIST[counter] = blockBT;
 
-
-
 counter++;
 var blockLT = new Block(counter,-16.75,2.75,-1.5,"Block",7.5,5,6,"","","",pipeColor);
 BLOCK_LIST[counter] = blockLT;
-
-
-
 
 //------Big Box BR---------//
 counter++;
@@ -279,7 +244,6 @@ BLOCK_LIST[counter] = tower;
 counter++;
 var towerSide = new Block(counter,20,5,0,"Block",6,12,4,"","","",towerColor);
 BLOCK_LIST[counter] = towerSide;
-
 
 counter++;
 var towerFront = new Block(counter,-7.5,2.5,-20,"Block",7,5,13,"","","",towerColor);
@@ -350,12 +314,7 @@ counter++;
 var support8 = new Block(counter,-6,11.875,-5.5,"Block",4,5.75,5,"","","",towerColor);
 BLOCK_LIST[counter] = support8;
 
-
-
-
-
 //------Middle Pipe----------//
-
 counter++;
 var middlePipe1 = new Block(counter,-4, 14,-10,"Block",1,1,2,"","","",pipeColor);
 BLOCK_LIST[counter] = middlePipe1;
@@ -413,8 +372,6 @@ counter++;
 var middlePipe14 = new Block(counter,-25, 1,-10,"Block",1,1,2,"","","",pipeColor);
 BLOCK_LIST[counter] = middlePipe14;
 
-
-
 //------Front right building----------//
 counter++;
 var buildingFLColor = 0x555656;
@@ -426,7 +383,6 @@ var buildingFL2 = new Block(counter,36, 3,-32,"Block",14,6,10,"","","", building
 BLOCK_LIST[counter] = buildingFL2;
 
 //-----right side boxes-------//
-
 counter++;
 var rightBoxColor = 0xa89784;
 var rightBox1 = new Block(counter,43, 2,-15,"Block",4,4,4,"","","", rightBoxColor);
@@ -441,7 +397,6 @@ var rightBox3 = new Block(counter,43, 2,15,"Block",4,4,4,"","","", rightBoxColor
 BLOCK_LIST[counter] = rightBox3;
 
 //blue container
-
 var bContainerColor = 0x565482;
 counter++;
 var bContainer = new Block(counter,5, 2.5,-44,"Block",15,4,4,"","","", bContainerColor);
@@ -473,7 +428,6 @@ counter++;
 var rContainer3 = new Block(counter,5, 2.5, 41.75,"Block",15,4,0.5,"","","", rContainerColor);
 BLOCK_LIST[counter] = rContainer3;
 
-
 counter++;
 var rContainer4 = new Block(counter,-4, 1.5, 41.75,"Block",3,2,0.5,"","","", rContainerColor);
 BLOCK_LIST[counter] = rContainer4;
@@ -485,7 +439,6 @@ var containerBL = new Block(counter,-20, 2, 41.75,"Block",12,4,3,"","","", conta
 BLOCK_LIST[counter] = containerBL;
 
 //building BL
-
 var buildingBLColor = 0xc8b125;
 counter++;
 var buildingBL = new Block(counter,-40, 2, 35,"Block",12,10,18,"","","", buildingBLColor);
@@ -496,7 +449,6 @@ var buildingLMColor = 0xc86a41;
 counter++;
 var buildingLM = new Block(counter,-47.5, 2.5, 10,"Block",5,4,15,"","","", buildingLMColor);
 BLOCK_LIST[counter] = buildingLM;
-
 
 counter++;
 var buildingLM2 = new Block(counter,-43, 4.25, 3,"Block",4,0.5,11,"","","", buildingLMColor);
@@ -569,48 +521,11 @@ var hiddenBottomColor = 0x4a4642;
 var hiddenBottom = new Block(counter,36, 1.25, 48,"Block",4,1.5,4,"","","", hiddenBottomColor);
 BLOCK_LIST[counter] = hiddenBottom;
 
-
 //front left container
 counter++;
 var containerFLColor = 0xede4e4;
 var containerFL = new Block(counter,-36, 2, -32,"Block",4,4,15,"","","", containerFLColor);
 BLOCK_LIST[counter] = containerFL;
-
-
-/*
-var counter = 1;
-for (var i = -30; i < 30; i++){
-  for(var j = -30; j < 30; j++){
-    var block = new Block(counter,i,0,j,"Block", 1, 1, "client/img/wood2.jpeg", "client/img/hardwood_floor.jpg", "client/img/wood2.jpeg");
-    BLOCK_LIST[counter] = block;
-    counter++;
-  }
-}
-
-for (var i = 5; i < 7; i++){
-  for(var j = 3; j < 15; j++){
-    var block = new Block(counter,i,0,j,"Block", 1, 1, "client/img/wood2.jpeg", "client/img/hardwood_floor.jpg", "client/img/wood2.jpeg");
-    BLOCK_LIST[counter] = block;
-    counter++;
-  }
-}
-
-BLOCK_LIST[counter] = new Block(counter, 0, 1, 0, "Block",1,1,"client/img/bricks1.jpg", "client/img/4.jpg", "client/img/bricks1.jpg");
-counter++;
-BLOCK_LIST[counter] = new Block(counter, 1, 2, 0, "Block",1,1,"client/img/bricks1.jpg", "client/img/4.jpg", "client/img/bricks1.jpg");
-counter++;
-BLOCK_LIST[counter] = new Block(counter, 2, 3, 0, "Block",1,1,"client/img/bricks1.jpg", "client/img/4.jpg", "client/img/bricks1.jpg");
-counter++;
-BLOCK_LIST[counter] = new Block(counter, 3, 4, 0, "Block",1,1,"client/img/bricks1.jpg", "client/img/4.jpg", "client/img/bricks1.jpg");
-counter++;
-BLOCK_LIST[counter] = new Block(counter, 4, 5, 0, "Block",1,1,"client/img/bricks1.jpg", "client/img/4.jpg", "client/img/bricks1.jpg");
-
-*/
-
-
-
-
-
 
 
 
@@ -649,6 +564,7 @@ io.sockets.on('connection', function(socket){//called when player connects with 
   }
   SOCKET_LIST[socket.id].emit('initPlayers', playerPack);//sending other player information to new player
 
+  //sending map information to players on connection
   var blockPack = [];
   for (var i in BLOCK_LIST){
     var block = BLOCK_LIST[i];
@@ -705,9 +621,14 @@ io.sockets.on('connection', function(socket){//called when player connects with 
     player.z = data[0].playerZ;
   });
 
+  /*
+  This is called each time a player shoots a bullet to update the rest of the server
+  */
   socket.on('newBullet',function(data){
     var bullet = new Bullet(data[0].id,player.id,data[0].x,data[0].y,data[0].z,'Bullet');
     BULLET_LIST[bullet.id] = bullet;
+    delete bullet;
+    //sending bullet information to each player
     for(var i in SOCKET_LIST){
       if(PLAYER_LIST[i].id != player.id){
         SOCKET_LIST[i].emit('newBulletPlayer',data);
@@ -715,53 +636,31 @@ io.sockets.on('connection', function(socket){//called when player connects with 
     }
   });
 
-var bulletThresholdDistance = 50;
+  //This is the max distance a bullet can be from any player before it is removed from the server
+  var bulletThresholdDistance = 50;
 
+  //Getting updated on bullet information from players
   socket.on('bulletInfo',function(data){
-    //collision detection happens here
-
     var newData = [];
     for (var i in data){
-      //var id = parseInt(data[i].name);
       if(BULLET_LIST[data[i].id]){
-      BULLET_LIST[data[i].id].x = data[i].x;
-      BULLET_LIST[data[i].id].y = data[i].y;
-      BULLET_LIST[data[i].id].z = data[i].z;
-    }
-
-      // var idCollision = checkCollisionBulletPlayers(data[i].x,data[i].y,data[i].z,data[i].id,player.id);
-      // if (idCollision != -1){//collision detected with data[i] bullet and player with idCollision
-      //   console.log("collision detected, Bullet: " + data[i].name + " Player: " + idCollision);
-      //   newData.push({
-      //     bulletName:data[i].name,
-      //     bulletX:data[i].x,
-      //     bulletY:data[i].y,
-      //     bulletZ:data[i].z,
-      //     playerID:idCollision,
-      //     killerID:player.id
-      //   });
-      //
-      //   for (var s in SOCKET_LIST){
-      //     SOCKET_LIST[s].emit('bulletCollision',newData);
-      //     //console.log("Bullet removed for collision");
-      //     removeBulletFromServer(data[i].name);
-      //   }
-      //   //socket.emit('bulletCollision',newData);
-      // }
+        BULLET_LIST[data[i].id].x = data[i].x;
+        BULLET_LIST[data[i].id].y = data[i].y;
+        BULLET_LIST[data[i].id].z = data[i].z;
+      }
     }
   });
 
-  //-------new collision bullets--------------//
 
   //playerCode will send this when bullet collision detected with other player
   socket.on('playerShot', function(data){
     //console.log("Player " + data.killedID + " killed by " + data.killerID + " with bullet " + data.bulletID);
-    for (var s in SOCKET_LIST){
+    for (var s in SOCKET_LIST){//broadcasting to server that a player has been shot
       SOCKET_LIST[s].emit('bulletCollision', {bulletName:data.bulletID,playerID:data.killedID,killerID:data.killerID});
     }
 
+    //remove bullet when collision is detected
     removeBulletFromServer(data.bulletID);
-    //first kill player hit
   });
 
   //playerCode will send this when it wants to remove a bullet from the server
@@ -770,8 +669,6 @@ var bulletThresholdDistance = 50;
   });
 
 
-
-  //---------end new collision-------------//
 
   /*
     This function recieves keypress information from the user
@@ -793,55 +690,18 @@ var bulletThresholdDistance = 50;
   // });
 });
 
-/*//This is old code from when the collision detection was handled by the server, very laggy had to move to browser side
-var playerDist;
-
-var checkCollisionBulletPlayers = function (x,y,z,name,selfID){
-  var lowDist = 100;
-  for (var i in PLAYER_LIST){
-    playerDist = distanceTwoPoints(x,y,z,PLAYER_LIST[i].x,PLAYER_LIST[i].y,PLAYER_LIST[i].z);
-    if (playerDist < lowDist){
-      lowDist = playerDist;
-    }
-    if (PLAYER_LIST[i].id != selfID){
-      if (playerDist < 0.5){//add collision detection points here, as of now it is just 0.5 distance from camera
-        console.log("Collision between bullet " + name + " and player " + PLAYER_LIST[i].id);
-        return PLAYER_LIST[i].id;
-      }
-    }
-  }
-  if (lowDist > 50){
-    removeBulletFromServer(name);
-    //console.log("Bullet " + name + " removed for distance");
-  }
-  return -1;
-}
-
-var distanceTwoPoints = function(x1,y1,z1,x2,y2,z2){
-  var sum = Math.pow((x1-x2),2) + Math.pow((y1-y2),2) + Math.pow((z1-z2),2);
-  var dist = Math.sqrt(sum);
-  return dist;
-}
-*/
-
+//This function removes a bullet from each players scene and from the servers bullet list
 var removeBulletFromServer = function(name){
   var bulletID = [];
   bulletID.push({id:name});
   for (var s in SOCKET_LIST){
     SOCKET_LIST[s].emit('removeBullet',bulletID);
   }
-  if (BULLET_LIST[name]){
-    //console.log("Bullet " + name + " found and removed.");
-  } else {
-    //console.log("Cannot find bullet" + name);
-  }
+  // if (BULLET_LIST[name]){
+  //   console.log("Found and deleting bullet " + name);
+  // }
   delete BULLET_LIST[name];
 }
-
-
-
-
-
 
 /*
   This is the gameloop function

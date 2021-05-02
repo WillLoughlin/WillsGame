@@ -851,6 +851,10 @@ var makeSphere = function (x,y,z) {
   //sphere.name = String(bulletID + selfID);
 }
 
+var killClock = new THREE.Clock();
+var lastKilled = 0;
+var timeChange = 0;
+
 var playerDist;
 var checkCollisionBulletPlayersHelper = function (x,y,z,name){
   var lowDist = 100;
@@ -867,7 +871,12 @@ var checkCollisionBulletPlayersHelper = function (x,y,z,name){
         //console.log("Collision between bullet " + name + " and player " + i);
         var shot = closeCheckBulletPlayer(x,y,z,i);
         if (shot){
-          socket.emit('playerShot', {bulletID:name,killedID:i,killerID:selfID});
+          timeChange = killClock.getDelta();
+          if ((i == lastKilled && timeChange > 2) || i != lastKilled){
+            socket.emit('playerShot', {bulletID:name,killedID:i,killerID:selfID});
+            removeSelfBullet(name);
+            lastKilled = i;
+          }
         }
         //console.log("Shot player with bullet " + name);
         return i;
@@ -877,13 +886,25 @@ var checkCollisionBulletPlayersHelper = function (x,y,z,name){
 
   if (lowDist > 50){
     socket.emit('removeBulletSend',{bulletID:name});
-    //add socket emit remove bullet
-    //removeBulletFromServer(name);
     //console.log("Bullet " + name + " removed for distance");
   }
   return -1;
 }
 
+//removing bullet after shooting someone to prevent multiple hit detections
+var removeSelfBullet = function(name){
+  var bulletID = String(name);
+  var bulletObject = scene.getObjectByName(bulletID);
+  // if (bulletObject){
+  //   console.log("Found bullet");
+  // } else {
+  //   console.log("couldnt find bullet");
+  // }
+  scene.remove(bulletObject);
+
+  delete BULLET_CAM_LIST[bulletID];
+  delete BULLET_MODEL_LIST[bulletID];
+}
 
 //Widths
 // s1: 12 -> .156
@@ -893,7 +914,6 @@ var checkCollisionBulletPlayersHelper = function (x,y,z,name){
 // s5: 18 -> .234
 // s6: 12 -> .156
 // s7: 12 -> .156
-
 //Scale: 0.013
 
 var closeCheckBulletPlayer = function(x,y,z,playerID){
@@ -971,8 +991,6 @@ socket.on('newBulletPlayer',function(data){
 socket.on('removeBullet',function(data){
   var bulletID = String(data[0].id);
   var bulletObject = scene.getObjectByName(bulletID);
-  //console.log("attempting to remove bullet with name " + data[0].id);
-  //console.log("Bullet name: " + bulletObject.name);
   // if (bulletObject){
   //   console.log("Found bullet");
   // } else {
