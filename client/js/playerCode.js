@@ -1162,6 +1162,19 @@ socket.on('gameLoop', function(data){
     camera.position.y = 1;
     canJump = true;
   }
+
+  if (camera.position.x > 50){
+    camera.position.x = 50;
+  }
+  if (camera.position.x < -50){
+    camera.position.x = -50;
+  }
+  if (camera.position.z > 50){
+    camera.position.z = 50;
+  }
+  if (camera.position.z < -50){
+    camera.position.z = -50;
+  }
   //----------------------End player movement------------------------//
 
   if(selfPlayerModel){
