@@ -32,7 +32,7 @@ var BLOCK_LIST = {};
 var BULLET_LIST = {};
 
 //this info sent to player on connection
-var playerSpeed = 0.05;
+var playerSpeed = 0.10;
 var playerHeight = 2;
 
 
