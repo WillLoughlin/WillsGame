@@ -62,6 +62,7 @@ function Player(id, x, y, z, type, name){
   this.pressingLeft = false;
   this.pressingUp = false;
   this.pressingDown = false;
+  this.kills = 0;
 }//to add member functions go to https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Inheritance
 //wierd stuff with prototype keyword
 
@@ -624,6 +625,7 @@ io.sockets.on('connection', function(socket){//called when player connects with 
     player.x = data[0].playerX;
     player.y = data[0].playerY;
     player.z = data[0].playerZ;
+    player.kills = data[0].kills;
   });
 
   /*
@@ -695,6 +697,46 @@ io.sockets.on('connection', function(socket){//called when player connects with 
   // });
 });
 
+var calculateTop3 = function() {
+  data = [];
+  var number1 = "";
+  var number1Kills = 0;
+
+  var number2 = "";
+  var number2Kills = 0;
+
+  var number3 = "";
+  var number3Kills = 0;
+
+  for (var i in PLAYER_LIST){
+    if (PLAYER_LIST[i].kills > number1Kills){
+      number1 = PLAYER_LIST[i].name;
+      number1Kills = PLAYER_LIST[i].kills;
+    }
+  }
+  for (var i in PLAYER_LIST){
+    if (PLAYER_LIST[i].kills > number2Kills && PLAYER_LIST[i].name != number1){
+      number2 = PLAYER_LIST[i].name;
+      number2Kills = PLAYER_LIST[i].kills;
+    }
+  }
+  for (var i in PLAYER_LIST){
+    if (PLAYER_LIST[i].kills > number3Kills && PLAYER_LIST[i].name != number1 && PLAYER_LIST[i].name != number2){
+      number3 = PLAYER_LIST[i].name;
+      number3Kills = PLAYER_LIST[i].kills;
+    }
+  }
+  data.push({
+    number1:number1,
+    number1Kills:number1Kills,
+    number2:number2,
+    number2Kills:number2Kills,
+    number3:number3,
+    number3Kills:number3Kills
+  });
+  return data;
+}
+
 //This function removes a bullet from each players scene and from the servers bullet list
 var removeBulletFromServer = function(name){
   var bulletID = [];
@@ -739,8 +781,19 @@ setInterval(function(){//game loop
       z:bullet.z,
       id:bullet.id,
       type:'Bullet'
-    })
+    });
   }
+
+  var top3 = calculateTop3();
+  pack.push({
+    number1:top3[0].number1,
+    number1Kills:top3[0].number1Kills,
+    number2:top3[0].number2,
+    number2Kills:top3[0].number2Kills,
+    number3:top3[0].number3,
+    number3Kills:top3[0].number3Kills,
+    type:'top3'
+  });
 
   for (var i in SOCKET_LIST){
     var socket = SOCKET_LIST[i];

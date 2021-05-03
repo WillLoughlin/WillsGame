@@ -245,34 +245,34 @@ camera.add(bottomLeftGUI);
 bottomLeftGUI.material.map.needsUpdate = true;
 
 canvasBL.fillStyle = '#000';
-canvasBL.font = "20px Georgia";
+canvasBL.font = "25px Georgia";
 canvasBL.fillText("Bottom left GUI", 10, 50);
 
 //------------------End Bottom Left GUI-----------------------//
 
-//--------------------Top Left GUI-------------------------//
-const topLeftGeometry = new THREE.BoxGeometry( 0.15, 0.15, 0.001);
-var canvasTL = document.createElement('canvas').getContext('2d');
-canvasTL.canvas.width = 256;
-canvasTL.canvas.height = 256;
-canvasTL.fillStyle = '#FFF';
-canvasTL.fillRect(0, 0, canvasTL.canvas.width, canvasTL.canvas.height);
-const textureTL = new THREE.CanvasTexture(canvasTL.canvas);
-const materialTL = new THREE.MeshBasicMaterial({
-  map: textureTL,
-  opacity: 0.8,
+//--------------------Top Right GUI-------------------------//
+const topRightGeometry = new THREE.BoxGeometry( 0.15, 0.15, 0.001);
+var canvasTR = document.createElement('canvas').getContext('2d');
+canvasTR.canvas.width = 256;
+canvasTR.canvas.height = 256;
+canvasTR.fillStyle = '#FFF';
+canvasTR.fillRect(0, 0, canvasTR.canvas.width, canvasTR.canvas.height);
+const textureTR = new THREE.CanvasTexture(canvasTR.canvas);
+const materialTR = new THREE.MeshBasicMaterial({
+  map: textureTR,
+  opacity: 1,
   transparent: true,
 });
-const topLeftGUI = new THREE.Mesh(topLeftGeometry, materialTL);
-topLeftGUI.position.x = -1 * guiDistX - 0.05;
-topLeftGUI.position.y = guiDistY - 0.11;
-topLeftGUI.position.z = -0.5;
-camera.add(topLeftGUI);
-topLeftGUI.material.map.needsUpdate = true;
+const topRightGUI = new THREE.Mesh(topRightGeometry, materialTR);
+topRightGUI.position.x = guiDistX;
+topRightGUI.position.y = guiDistY - 0.1;
+topRightGUI.position.z = -0.5;
+camera.add(topRightGUI);
+topRightGUI.material.map.needsUpdate = true;
 
-canvasTL.fillStyle = '#000';
-canvasTL.font = "20px Georgia";
-canvasTL.fillText("Map Here", 10, 100);
+canvasTR.fillStyle = '#000';
+canvasTR.font = "25px Georgia";
+canvasTR.fillText("Leaderboard", 50, 25);
 
 
 //notifications
@@ -832,6 +832,9 @@ var clickFunction = function() {
   bulletCam.rotation.copy(camera.rotation);
   bulletCam.position.copy(camera.position);
 
+  if (bulletID > 14){
+    bulletID = 1;
+  }
   BULLET_CAM_LIST[bulletID + selfID] = bulletCam;
   const sphere = new THREE.Mesh( bulletGeometry, bulletMaterial );
   scene.add( sphere );
@@ -1103,6 +1106,14 @@ var target = new THREE.Vector3();//used to save camera direction
 var oldX = 0;
 var oldY = 0;
 
+var number1 = "";
+var number1Kills = 0;
+var number2 = "";
+var number2Kills = 0;
+var number3 = "";
+var number3Kills = 0;
+
+
 var vecRight = new THREE.Vector3();
 var vecForward = new THREE.Vector3();
 
@@ -1159,6 +1170,17 @@ socket.on('gameLoop', function(data){
         ENEMY_BULLET_LIST[data[i].id].position.y = data[i].y;
         ENEMY_BULLET_LIST[data[i].id].position.z = data[i].z;
       }
+    }
+  }
+
+  for(var i = 0; i < data.length; i++){
+    if (data[i].type == 'top3'){
+      number1 = data[i].number1;
+      number1Kills = data[i].number1Kills;
+      number2 = data[i].number2;
+      number2Kills = data[i].number2Kills;
+      number3 = data[i].number3;
+      number3Kills = data[i].number3Kills;
     }
   }
 
@@ -1254,6 +1276,8 @@ socket.on('gameLoop', function(data){
   }
 
 
+
+
   updateBullets();
   sendPlayerInfo();
   sendBulletInfo();
@@ -1330,7 +1354,8 @@ var sendPlayerInfo = function(){
     cameraZ:rotation.z,
     playerX:posX,
     playerY:posY,
-    playerZ:posZ
+    playerZ:posZ,
+    kills:kills
   });
   socket.emit('selfMoveInfo',data);
 };
@@ -1373,6 +1398,7 @@ var selfKilled = function(killerName){
   respawn();
   deathNotification(killerName);
   deaths = deaths + 1;
+  ammo = 7;
 }
 
 var deathNotification = function(killerName) {
@@ -1386,9 +1412,6 @@ var deathNotification = function(killerName) {
   canvasNot.fillStyle = '#ffffff';
   canvasNot.fillText("You were killed by " + killerName,30,15);
   notificationGUI.material.map.needsUpdate = true;
-
-
-
 }
 
 var killNotification = function(killedName) {
@@ -1512,9 +1535,9 @@ var updateGUI = function(){
   canvasBL.fillRect(0, 0, canvasBL.canvas.width, canvasBL.canvas.height);
   canvasBL.fillStyle = '#000';
   var textBL = "Kills: " + kills;
-  canvasBL.fillText(textBL, 100, 50);
+  canvasBL.fillText(textBL, 150, 50);
   var textBL2 = "Deaths: " + deaths;
-  canvasBL.fillText(textBL2,77,85);
+  canvasBL.fillText(textBL2,117,85);
   bottomLeftGUI.material.map.needsUpdate = true;
 
   //bottom right gui here
@@ -1562,4 +1585,29 @@ var updateGUI = function(){
     canvasNot.clearRect(0,0,canvasNot.canvas.width,canvasNot.canvas.height);
     notificationGUI.material.map.needsUpdate = true;
   }
+
+  canvasTR.clearRect(0,0,canvasTR.canvas.width,canvasTR.canvas.height);
+  canvasTR.fillStyle = '0x000000';
+  canvasTR.font = '28px Georgia';
+  canvasTR.fillText("Leaderboard", 50, 25);
+  canvasTR.fillRect(55,30,150,5);
+
+  if (number1 != ""){
+    canvasTR.fillText(number1 + ": " + number1Kills, 50, 65);
+    //console.log("number 1 is " + number1);
+  }
+  if (number2 != ""){
+    canvasTR.fillText(number2 + ": " + number2Kills, 50, 105);
+    //console.log("number 1 is " + number1);
+  }
+  if (number3 != ""){
+    canvasTR.fillText(number3 + ": " + number3Kills, 50, 145);
+    //console.log("number 1 is " + number1);
+  }
+  topRightGUI.material.map.needsUpdate = true;
+
+
+
+
+
 }
