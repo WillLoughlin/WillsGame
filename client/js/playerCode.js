@@ -1604,15 +1604,15 @@ var updateGUI = function(){
   canvasTR.fillRect(55,30,150,5);
 
   if (number1 != ""){
-    canvasTR.fillText(number1 + ": " + number1Kills, 50, 65);
+    canvasTR.fillText("1." + number1 + ": " + number1Kills, 20, 65);
     //console.log("number 1 is " + number1);
   }
   if (number2 != ""){
-    canvasTR.fillText(number2 + ": " + number2Kills, 50, 105);
+    canvasTR.fillText("2." + number2 + ": " + number2Kills, 20, 105);
     //console.log("number 1 is " + number1);
   }
   if (number3 != ""){
-    canvasTR.fillText(number3 + ": " + number3Kills, 50, 145);
+    canvasTR.fillText("3." + number3 + ": " + number3Kills, 20, 145);
     //console.log("number 1 is " + number1);
   }
   topRightGUI.material.map.needsUpdate = true;
