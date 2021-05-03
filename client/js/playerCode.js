@@ -14,6 +14,9 @@ import {FBXLoader} from './FBXLoader.js';//used to load player model
 var WIDTH = 500;
 var HEIGHT = 500;
 
+WIDTH = window.innerWidth - 0;
+HEIGHT = window.innerHeight - 0;
+
 var name = localStorage.getItem("playerName");
 console.log("Player name: " + name);
 if (name == ""){
@@ -87,6 +90,20 @@ var socket = io();
 var selfID = 0;
 //var indexSelf = 0;
 
+//Function to resize canvas if screen size changes
+let resizeCanvas = function(){
+  WIDTH = window.innerWidth - 0;//needs - 0 otherwise html loads really slow for some reason
+  HEIGHT = window.innerHeight - 0;
+
+  renderer.setSize(WIDTH, HEIGHT);//resetting render image size
+  camera.aspect = WIDTH/HEIGHT;//fixing aspect ratio
+  camera.updateProjectionMatrix();//updating camera with new aspect ratio
+
+}
+resizeCanvas();//resize first time to get correct size
+
+console.log("Width: " + WIDTH + " HEight: " + HEIGHT);
+
 
 //Getting player's self ID
 socket.on('setID', function(playerID){
@@ -153,6 +170,8 @@ const materialBox = new THREE.MeshBasicMaterial( {color: 0x336BFF, wireframe:tru
 var reticleWidth = 0.01;
 var reticleHeight = 0.015;
 var reticleDist = 0.015;
+// var reticleDistWidth = 0.00000977;
+// var reticleDistHeight = 0.00001989;
 
 const reticleGeometryTop = new THREE.BoxGeometry( reticleWidth, reticleHeight, reticleHeight);
 const reticleMaterial = new THREE.MeshBasicMaterial( {color: 0x00FFFF} );
@@ -195,8 +214,11 @@ camera.add(cube4);
 
 // var guiDistX = 0.92;
 // var guiDistY = 0.65;
-var guiDistX = 0.46;
-var guiDistY = 0.30;
+//var guiDistX = 0.46;
+var guiDistX = 0.00026;
+//var guiDistY = 0.30;
+var guiDistY = 0.00031;
+
 
 const bottomRightGeometry = new THREE.BoxGeometry( 0.25, 0.25, 0.001);
 //const reticleMaterial = new THREE.MeshBasicMaterial( {color: 0x00FFFF} );
@@ -214,8 +236,8 @@ const materialBR = new THREE.MeshBasicMaterial({
   transparent: true,
 });
 const bottomRightGUI = new THREE.Mesh(bottomRightGeometry, materialBR);
-bottomRightGUI.position.x = guiDistX;
-bottomRightGUI.position.y = -1 * guiDistY;
+bottomRightGUI.position.x = guiDistX * WIDTH;
+bottomRightGUI.position.y = -1 * guiDistY * HEIGHT;
 bottomRightGUI.position.z = -0.5;
 camera.add(bottomRightGUI);
 bottomRightGUI.material.map.needsUpdate = true;
@@ -242,8 +264,8 @@ const materialBL = new THREE.MeshBasicMaterial({
   transparent: true,
 });
 const bottomLeftGUI = new THREE.Mesh(bottomLeftGeometry, materialBL);
-bottomLeftGUI.position.x = -1 * guiDistX;
-bottomLeftGUI.position.y = -1 * guiDistY;
+bottomLeftGUI.position.x = -1 * guiDistX * WIDTH;
+bottomLeftGUI.position.y = -1 * guiDistY * HEIGHT;
 bottomLeftGUI.position.z = -0.5;
 camera.add(bottomLeftGUI);
 bottomLeftGUI.material.map.needsUpdate = true;
@@ -268,8 +290,8 @@ const materialTR = new THREE.MeshBasicMaterial({
   transparent: true,
 });
 const topRightGUI = new THREE.Mesh(topRightGeometry, materialTR);
-topRightGUI.position.x = guiDistX;
-topRightGUI.position.y = guiDistY - 0.1;
+topRightGUI.position.x = guiDistX * WIDTH;
+topRightGUI.position.y = guiDistY * HEIGHT - 0.1;
 topRightGUI.position.z = -0.5;
 camera.add(topRightGUI);
 topRightGUI.material.map.needsUpdate = true;
@@ -294,7 +316,7 @@ const materialNot = new THREE.MeshBasicMaterial({
 });
 const notificationGUI = new THREE.Mesh(notificationGeomoetry, materialNot);
 notificationGUI.position.x = 0;
-notificationGUI.position.y = -1 * guiDistY + 0.25;
+notificationGUI.position.y = -0.05;
 notificationGUI.position.z = -0.2;
 camera.add(notificationGUI);
 notificationGUI.material.map.needsUpdate = true;
@@ -744,18 +766,6 @@ socket.on('disconnectedPlayer',function(oldPlayer){
 //end adding stuff to scene
 
 
-//Function to resize canvas if screen size changes
-let resizeCanvas = function(){
-  WIDTH = window.innerWidth - 0;//needs - 0 otherwise html loads really slow for some reason
-  HEIGHT = window.innerHeight - 0;
-
-  renderer.setSize(WIDTH, HEIGHT);//resetting render image size
-  camera.aspect = WIDTH/HEIGHT;//fixing aspect ratio
-  camera.updateProjectionMatrix();//updating camera with new aspect ratio
-
-}
-resizeCanvas();//resize first time to get correct size
-
 window.addEventListener('resize',function(){//called if canvas size changes
   resizeCanvas();
 });
@@ -771,11 +781,27 @@ document.addEventListener( 'click', function () {
 
 scene.add(controls.getObject());//adding controls to scene
 
+var moveGUILocX = function(direction){
+  var step = .01 * direction;
+  bottomRightGUI.position.x = bottomRightGUI.position.x + step;
+  bottomLeftGUI.position.x = bottomLeftGUI.position.x - step;
+  topRightGUI.position.x = topRightGUI.position.x + step;
+}
+
+var moveGUILocY = function(direction){
+  var step = .01 * direction;
+  bottomRightGUI.position.y = bottomRightGUI.position.y - step;
+  bottomLeftGUI.position.y = bottomLeftGUI.position.y - step;
+  topRightGUI.position.y = topRightGUI.position.y + step;
+
+}
 
 //This function handles button inputs, will work for WASD or arrows
 document.onkeydown  = function ( event ) {//called when keys are pressed
 	switch ( event.code ) {
 	case 'ArrowUp':
+    moveGUILocY(1);
+    break;
 	case 'KeyW':
 		moveForward = true;//this will happen if you press w or uparrow
     //selfPlayerModel.updatePosition(camera.position.x,camera.position.y,camera.position.z);
@@ -783,6 +809,8 @@ document.onkeydown  = function ( event ) {//called when keys are pressed
 		break;
 
 	case 'ArrowLeft':
+    moveGUILocX(-1);
+    break;
 	case 'KeyA':
 		moveLeft = true;
     //selfPlayerModel.updatePosition(camera.position.x,camera.position.y,camera.position.z);
@@ -790,6 +818,8 @@ document.onkeydown  = function ( event ) {//called when keys are pressed
 		break;
 
 	case 'ArrowDown':
+    moveGUILocY(-1);
+    break;
 	case 'KeyS':
 		moveBackward = true;
     //selfPlayerModel.updatePosition(camera.position.x,camera.position.y,camera.position.z);
@@ -797,6 +827,8 @@ document.onkeydown  = function ( event ) {//called when keys are pressed
 		break;
 
 	case 'ArrowRight':
+    moveGUILocX(1);
+    break;
 	case 'KeyD':
 		moveRight = true;
     //selfPlayerModel.updatePosition(camera.position.x,camera.position.y,camera.position.z);
