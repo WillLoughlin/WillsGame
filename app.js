@@ -554,13 +554,13 @@ io.sockets.on('connection', function(socket){//called when player connects with 
   //this sends all other player information to new player just connected
   var playerPack = [];
   for (var i in PLAYER_LIST){//loop through each player
-      var player = PLAYER_LIST[i];
+      var playeri = PLAYER_LIST[i];
       playerPack.push({
-        name:player.name,
-        x:player.x,
-        y:player.y,
-        z:player.z,
-        id:player.id
+        name:playeri.name,
+        x:playeri.x,
+        y:playeri.y,
+        z:playeri.z,
+        id:playeri.id
       });//adding each player position and view direction to pack
   }
   SOCKET_LIST[socket.id].emit('initPlayers', playerPack);//sending other player information to new player
@@ -609,15 +609,15 @@ io.sockets.on('connection', function(socket){//called when player connects with 
   });
 
   socket.on('setName',function(data) {
+    //console.log("recieved name: " + data.name);
+    player.name = data.name;
+
     for (var i in PLAYER_LIST){
       if (data.name == PLAYER_LIST[i].name && i != player.id){
         player.name = data.name + String(player.id).substring(1,5);
       }
     }
-    if (player.name == ""){
-      player.name = data.name;
-    }
-    console.log("New player joined with name: " + player.name);
+    //console.log("New player joined with name: " + player.name);
   });
 
 
@@ -715,7 +715,10 @@ var calculateTop3 = function() {
   var number3 = "";
   var number3Kills = 0;
 
+  var playerCounter = 0;
+
   for (var i in PLAYER_LIST){
+    playerCounter++;
     if (PLAYER_LIST[i].kills > number1Kills){
       number1 = PLAYER_LIST[i].name;
       number1Kills = PLAYER_LIST[i].kills;
@@ -739,7 +742,8 @@ var calculateTop3 = function() {
     number2:number2,
     number2Kills:number2Kills,
     number3:number3,
-    number3Kills:number3Kills
+    number3Kills:number3Kills,
+    playerCount:playerCounter
   });
   return data;
 }
@@ -799,6 +803,7 @@ setInterval(function(){//game loop
     number2Kills:top3[0].number2Kills,
     number3:top3[0].number3,
     number3Kills:top3[0].number3Kills,
+    playerCount:top3[0].playerCount,
     type:'top3'
   });
 

@@ -1117,6 +1117,7 @@ var number2Kills = 0;
 var number3 = "";
 var number3Kills = 0;
 
+var numPlayers = 0;
 
 var vecRight = new THREE.Vector3();
 var vecForward = new THREE.Vector3();
@@ -1185,6 +1186,7 @@ socket.on('gameLoop', function(data){
       number2Kills = data[i].number2Kills;
       number3 = data[i].number3;
       number3Kills = data[i].number3Kills;
+      numPlayers = data[i].playerCount;
     }
   }
 
@@ -1534,14 +1536,19 @@ var notifClock = new THREE.Clock();
 
 var updateGUI = function(){
   //bottom left GUI here
+  canvasBL.font = "30px Georgia";
   canvasBL.clearRect(0,0,canvasBL.canvas.width, canvasBL.canvas.height);
   canvasBL.fillStyle = '#ffffff';
   canvasBL.fillRect(0, 0, canvasBL.canvas.width, canvasBL.canvas.height);
   canvasBL.fillStyle = '#000';
   var textBL = "Kills: " + kills;
-  canvasBL.fillText(textBL, 150, 50);
+  canvasBL.fillText(textBL, 150, 30);
   var textBL2 = "Deaths: " + deaths;
-  canvasBL.fillText(textBL2,117,85);
+  canvasBL.fillText(textBL2,117,65);
+  canvasBL.font = '20px Georgia';
+  var textBL3 = "Current Players: " + numPlayers;
+  canvasBL.fillText(textBL3,80,95);
+
   bottomLeftGUI.material.map.needsUpdate = true;
 
   //bottom right gui here
