@@ -607,6 +607,11 @@ io.sockets.on('connection', function(socket){//called when player connects with 
     delete PLAYER_LIST[socket.id];//delete player from list
   });
 
+  socket.on('setName',function(data) {
+    player.name = data.name;
+    console.log("New player joined with name: " + player.name);
+  });
+
 
   /*
   This function recieves player position and direction information from each player every cycle of gameloop
@@ -656,7 +661,7 @@ io.sockets.on('connection', function(socket){//called when player connects with 
   socket.on('playerShot', function(data){
     //console.log("Player " + data.killedID + " killed by " + data.killerID + " with bullet " + data.bulletID);
     for (var s in SOCKET_LIST){//broadcasting to server that a player has been shot
-      SOCKET_LIST[s].emit('bulletCollision', {bulletName:data.bulletID,playerID:data.killedID,killerID:data.killerID});
+      SOCKET_LIST[s].emit('bulletCollision', {bulletName:data.bulletID,playerID:data.killedID,killerID:data.killerID,killedName:PLAYER_LIST[data.killedID].name,killerName:PLAYER_LIST[data.killerID].name});
     }
 
     //remove bullet when collision is detected

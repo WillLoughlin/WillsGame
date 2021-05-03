@@ -16,7 +16,7 @@ var HEIGHT = 500;
 
 var name = localStorage.getItem("playerName");
 console.log("Player name: " + name);
-if (name = "" || !name){
+if (name == ""){
   console.log("player name not found, set to anonymous");
   name = "anonymous";
 }
@@ -95,6 +95,9 @@ socket.on('setID', function(playerID){
   playerSpeed = playerID.spd;
   playerHeight = playerID.hgt;
 });
+
+console.log("sending name: " + name);
+socket.emit('setName',{name:name});
 
 
 //First cube added to scene
@@ -272,6 +275,27 @@ canvasTL.font = "20px Georgia";
 canvasTL.fillText("Map Here", 10, 100);
 
 
+//notifications
+const notificationGeomoetry = new  THREE.BoxGeometry( 0.2, 0.02, 0.001);
+var canvasNot = document.createElement('canvas').getContext('2d');
+canvasNot.canvas.width = 256;
+canvasNot.canvas.height = 25.6;
+canvasNot.fillStyle = '#FFF';
+canvasNot.fillRect(0, 0, canvasNot.canvas.width, canvasNot.canvas.height);
+const textureNot = new THREE.CanvasTexture(canvasNot.canvas);
+const materialNot = new THREE.MeshBasicMaterial({
+  map: textureNot,
+  opacity: 0.8,
+  transparent: true,
+});
+const notificationGUI = new THREE.Mesh(notificationGeomoetry, materialNot);
+notificationGUI.position.x = 0;
+notificationGUI.position.y = -1 * guiDistY + 0.25;
+notificationGUI.position.z = -0.2;
+camera.add(notificationGUI);
+notificationGUI.material.map.needsUpdate = true;
+
+var notificationShown = false;
 
 
 //----------------Drawing other players in game-----------------------//
@@ -1335,18 +1359,50 @@ socket.on('bulletCollision',function(data) {//send from server when someone gets
   //console.log("Comparing " + selfID + " to " + data.playerID);
   if (selfID == data.playerID){//current player has been killed
     //console.log("Killed by player: " + data.killerID);
-    selfKilled(data.killerID);
+    selfKilled(data.killerName);
   }
   if (selfID == data.killerID){
     //console.log("Killed player: " + data.playerID);
+    killNotification(data.killedName);
     kills = kills + 1;
   }
 
 });
 
-var selfKilled = function(killerID){
+var selfKilled = function(killerName){
   respawn();
+  deathNotification(killerName);
   deaths = deaths + 1;
+}
+
+var deathNotification = function(killerName) {
+  notificationShown = true;
+  canvasNot.fillStyle = '#000';
+  canvasNot.font = "10px Georgia";
+  notifClock.stop();
+  notifClock.start();
+  // canvasNot.clearRect(0,0,canvasNot.canvas.width,canvasNot.canvas.height);
+  canvasNot.fillRect(0,0,canvasNot.canvas.width,canvasNot.canvas.height);
+  canvasNot.fillStyle = '#ffffff';
+  canvasNot.fillText("You were killed by " + killerName,30,15);
+  notificationGUI.material.map.needsUpdate = true;
+
+
+
+}
+
+var killNotification = function(killedName) {
+  notificationShown = true;
+  canvasNot.fillStyle = '#000';
+  canvasNot.font = "10px Georgia";
+  notifClock.stop();
+  notifClock.start();
+  // canvasNot.clearRect(0,0,canvasNot.canvas.width,canvasNot.canvas.height);
+  canvasNot.fillRect(0,0,canvasNot.canvas.width,canvasNot.canvas.height);
+  canvasNot.fillStyle = '#ffffff';
+  canvasNot.fillText("You killed " + killedName,15,15);
+  notificationGUI.material.map.needsUpdate = true;
+
 }
 
 var respawn = function(){
@@ -1446,6 +1502,9 @@ canvasBR.font = "30px Georgia";
 canvasBL.fillStyle = '#000';
 canvasBL.font = "30px Georgia";
 
+var notifClock = new THREE.Clock();
+
+
 var updateGUI = function(){
   //bottom left GUI here
   canvasBL.clearRect(0,0,canvasBL.canvas.width, canvasBL.canvas.height);
@@ -1453,9 +1512,9 @@ var updateGUI = function(){
   canvasBL.fillRect(0, 0, canvasBL.canvas.width, canvasBL.canvas.height);
   canvasBL.fillStyle = '#000';
   var textBL = "Kills: " + kills;
-  canvasBL.fillText(textBL, 48, 25);
+  canvasBL.fillText(textBL, 100, 50);
   var textBL2 = "Deaths: " + deaths;
-  canvasBL.fillText(textBL2,15,60);
+  canvasBL.fillText(textBL2,77,85);
   bottomLeftGUI.material.map.needsUpdate = true;
 
   //bottom right gui here
@@ -1490,4 +1549,17 @@ var updateGUI = function(){
     //canvasBR.fillText(reloadClock.getElapsedTime() + " / " + reloadTime, 10, 80);
   }
   bottomRightGUI.material.map.needsUpdate = true;
+
+
+  if (notificationShown){
+    if (notifClock.getElapsedTime() > 3){
+      canvasNot.clearRect(0,0,canvasNot.canvas.width,canvasNot.canvas.height);
+      notificationGUI.material.map.needsUpdate = true;
+      notificationShown = false;
+      notifClock.stop();
+    }
+  } else {
+    canvasNot.clearRect(0,0,canvasNot.canvas.width,canvasNot.canvas.height);
+    notificationGUI.material.map.needsUpdate = true;
+  }
 }
