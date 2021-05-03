@@ -99,6 +99,10 @@ socket.on('setID', function(playerID){
 console.log("sending name: " + name);
 socket.emit('setName',{name:name});
 
+socket.on('nameNeedsChange', function (data){
+  name = data.name;
+});
+
 
 //First cube added to scene
 /*

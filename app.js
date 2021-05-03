@@ -609,7 +609,14 @@ io.sockets.on('connection', function(socket){//called when player connects with 
   });
 
   socket.on('setName',function(data) {
-    player.name = data.name;
+    for (var i in PLAYER_LIST){
+      if (data.name == PLAYER_LIST[i].name && i != player.id){
+        player.name = data.name + String(player.id).substring(1,5);
+      }
+    }
+    if (player.name == ""){
+      player.name = data.name;
+    }
     console.log("New player joined with name: " + player.name);
   });
 
