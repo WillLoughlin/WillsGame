@@ -13,6 +13,7 @@ import {FBXLoader} from './FBXLoader.js';//used to load player model
 //Width and height of screen, will be changed when screen is sized
 var WIDTH = 500;
 var HEIGHT = 500;
+//472 x 418
 
 WIDTH = window.innerWidth - 0;
 HEIGHT = window.innerHeight - 0;
