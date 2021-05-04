@@ -850,6 +850,10 @@ document.onkeydown  = function ( event ) {//called when keys are pressed
       reload();
     }
     break;
+
+  case 'KeyE':
+    clickFunction();
+    break;
   }
 };
 
